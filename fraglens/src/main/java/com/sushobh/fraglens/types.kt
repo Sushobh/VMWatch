@@ -37,3 +37,7 @@ interface FLPropertyParser {
 interface FLPropertyStore {
     val propertyOwners : MutableMap<String, FLPropertyOwner>
 }
+
+interface FLPropertyParserInterceptor {
+    fun intercept(owner : Any,field : Field) : List<FLProperty>
+}
