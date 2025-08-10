@@ -1,5 +1,6 @@
 package com.sushobh.fraglens
 
+import kotlinx.coroutines.flow.Flow
 import java.lang.reflect.Field
 
 
@@ -39,5 +40,12 @@ interface FLPropertyStore {
 }
 
 interface FLPropertyParserInterceptor {
-    fun intercept(owner : Any,field : Field) : List<FLProperty>
+    fun intercept(owner : Any,field : Field) : FLProperty?
 }
+
+interface FragLensApi {
+    val viewModelIdFlow : Flow<List<FLViewModelId>>
+    fun parseProperties(flViewModelId: FLViewModelId) : FLPropertyOwner?
+}
+
+data class FLViewModelId(val code : Int,val name : String)

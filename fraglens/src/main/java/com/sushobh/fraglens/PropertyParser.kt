@@ -11,6 +11,18 @@ class FLPropertyParserImpl : FLPropertyParser{
         val clazz = owner::class.java
 
         clazz.declaredFields.forEach { field ->
+
+            val interceptors = FragLens.propertyInterceptors
+
+            for(interceptor in interceptors){
+                val parsedProperty = interceptor.intercept(owner,field)
+                if(parsedProperty != null){
+                    properties.add(parsedProperty)
+                    return@forEach
+                }
+            }
+
+
             field.isAccessible = true
             val value = field.get(owner)
             val type = field.type
