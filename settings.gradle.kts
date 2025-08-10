@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "Demo"
 include(":app")
 include(":fraglens")
+include(":fraglens-ui")
