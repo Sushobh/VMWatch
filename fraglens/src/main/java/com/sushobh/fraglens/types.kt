@@ -1,6 +1,7 @@
 package com.sushobh.fraglens
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import java.lang.reflect.Field
 
 
@@ -9,7 +10,7 @@ data class FLProperty(
     val type: String,
     val value: String? = null,
     val isMutable: Boolean = false,
-    val fieldValue : String? = null // This can be used to store the actual field value if needed
+    val fieldValue : String? = null
 ) {
     override fun toString(): String {
         return "Property(name='$name', type='$type', value=$value, isMutable=$isMutable)"
@@ -44,8 +45,10 @@ interface FLPropertyParserInterceptor {
 }
 
 interface FragLensApi {
-    val viewModelIdFlow : Flow<List<FLViewModelId>>
+    val viewModelIdFlow : StateFlow<List<FLViewModelId>>
     fun parseProperties(flViewModelId: FLViewModelId) : FLPropertyOwner?
 }
 
 data class FLViewModelId(val code : Int,val name : String)
+
+data class FLParserApiResponse(val isSuccess : Boolean = false,val items : List<FLProperty> = emptyList())
