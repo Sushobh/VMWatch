@@ -20,6 +20,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         vm.toString()
-        startActivity(Intent(this, com.sushobh.fraglens_ui.screens.MainActivity::class.java))
+        startActivity(Intent(this, com.sushobh.fraglens_ui.screens.FraglensActivity::class.java))
     }
 }

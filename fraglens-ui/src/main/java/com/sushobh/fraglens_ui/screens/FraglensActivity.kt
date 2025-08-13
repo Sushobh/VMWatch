@@ -1,7 +1,6 @@
 package com.sushobh.fraglens_ui.screens
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,8 +25,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sushobh.fraglens.FragLens
 import com.sushobh.fraglens_ui.screens.theme.ComposeBasicTheme
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
+import com.sushobh.fraglens_ui.screens.theme.GreenJC
 
-class MainActivity : ComponentActivity() {
+class FraglensActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,14 +48,27 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyListApp() {
     var viewmodelList = FragLens.viewModelIdFlow.collectAsStateWithLifecycle()
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(viewmodelList.value) {
-            NameCard(it.name)
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("ViewModel Lists") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GreenJC,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
+            )
+        }
+    ) { innerPadding ->
+        LazyColumn(
+            contentPadding = innerPadding,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(viewmodelList.value) {
+                NameCard(it.name)
+            }
         }
     }
 
