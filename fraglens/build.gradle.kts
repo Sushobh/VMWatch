@@ -41,4 +41,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(kotlin("reflect"))
+    implementation("com.sushobh:androidrestserver:1.0.0")
 }

@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sushobh.fraglens.FragLens
+import com.sushobh.fraglens_ui.screens.theme.ComposeBasicTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -17,7 +18,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-           // MyListApp()
+            ComposeBasicTheme {
+                MyListApp()
+            }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MyListApp() {
+    var frag = FragLens.viewModelIdFlow.collectAsStateWithLifecycle()
+    frag.value.forEach {
+        FragLens.parseProperties(it)?.name
+        Log.d("asfs", FragLens.parseProperties(it)?.name.toString())
     }
 }
