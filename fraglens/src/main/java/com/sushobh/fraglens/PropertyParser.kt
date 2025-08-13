@@ -3,7 +3,7 @@ package com.sushobh.fraglens
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FLPropertyParserImpl : FLPropertyParser{
+internal class FLPropertyParserImpl : FLPropertyParser{
 
     
     override fun parseProperties(owner: Any): FLPropertyOwner {

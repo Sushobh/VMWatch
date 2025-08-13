@@ -58,8 +58,8 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
 }
 
 
-object FragmentLifeCycleCallback : FragmentManager.FragmentLifecycleCallbacks() {
-    val fragmentEventName = "FragmentEvent"
+internal object FragmentLifeCycleCallback : FragmentManager.FragmentLifecycleCallbacks() {
+
     override fun onFragmentAttached(fm: FragmentManager, f: Fragment, context: Context) {
         super.onFragmentAttached(fm, f, context)
 
