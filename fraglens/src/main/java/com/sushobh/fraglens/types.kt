@@ -1,9 +1,7 @@
 package com.sushobh.fraglens
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import java.lang.reflect.Field
-
 
 data class FLProperty(
     val name: String,
@@ -51,4 +49,4 @@ interface FragLensApi {
 
 data class FLViewModelId(val code : Int,val name : String)
 
-data class FLParserApiResponse(val isSuccess : Boolean = false,val items : List<FLProperty> = emptyList())
+data class FLParserApiResponse(val isSuccess : Boolean = false,val items : List<FLProperty> = emptyList(), val viewmodelName : String)

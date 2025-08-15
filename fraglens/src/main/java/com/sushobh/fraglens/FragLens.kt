@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 object FragLens : FragLensApi {
     internal val propertyInterceptors = arrayListOf<FLPropertyParserInterceptor>()
-    private val port = 56777;
+    private val port = 56440;
     private var application: Application? = null
     private val activityStore = HashMap<Activity, List<Any>>()
     private val fragmentStore = HashMap<Fragment, List<Any>>()
@@ -129,9 +129,9 @@ object FragLens : FragLensApi {
                 override fun onRequest(requestBody: FLViewModelId): Any {
                     val props = parseProperties(requestBody)
                     if (props != null) {
-                        return FLParserApiResponse(isSuccess = true, items = props.properties)
+                        return FLParserApiResponse(isSuccess = true, items = props.properties, viewmodelName = props.name)
                     }
-                    return FLParserApiResponse(isSuccess = false)
+                    return FLParserApiResponse(isSuccess = false, items = emptyList(), viewmodelName = requestBody.name)
                 }
 
             }).startWebApp(false).build()
