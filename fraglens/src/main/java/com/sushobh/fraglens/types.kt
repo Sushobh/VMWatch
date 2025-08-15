@@ -8,7 +8,8 @@ data class FLProperty(
     val type: String,
     val value: String? = null,
     val isMutable: Boolean = false,
-    val fieldValue : String? = null
+    val fieldValue : String? = null,
+    val isClickToShow : Boolean = false
 ) {
     override fun toString(): String {
         return "Property(name='$name', type='$type', value=$value, isMutable=$isMutable)"
@@ -50,3 +51,11 @@ interface FragLensApi {
 data class FLViewModelId(val code : Int,val name : String)
 
 data class FLParserApiResponse(val isSuccess : Boolean = false,val items : List<FLProperty> = emptyList(), val viewmodelName : String)
+
+
+data class FLDisplayableValue(val shortDisplable : String,val fullDisplayable : String? = null)
+
+interface FLPropertySerialzer {
+    fun parseFullDisplayable(value : Any) : FLDisplayableValue
+    fun parseShortDisplayable(value : Any) : FLDisplayableValue
+}
