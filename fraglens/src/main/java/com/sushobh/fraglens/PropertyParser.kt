@@ -25,12 +25,26 @@ internal class FLPropertyParserImpl : FLPropertyParser{
         add(dataClassInterceptor)
     }
 
+    fun getDeclaredFieldsUpToLevel2(clazz: Class<*>): List<Field> {
+        val fields = mutableListOf<Field>()
+        var current: Class<*>? = clazz
+        var level = 0
+
+        while (current != null && level <= 2) {
+            fields += current.declaredFields
+            current = current.superclass
+            level++
+        }
+
+        return fields
+    }
+
 
     override fun parseProperties(owner: Any): FLPropertyOwner {
         val properties = mutableListOf<FLProperty>()
         val clazz = owner::class.java
 
-        clazz.declaredFields.forEach { field ->
+        getDeclaredFieldsUpToLevel2(clazz).forEach { field ->
             val parsedProperty = parseField(owner,field,false)
             if(parsedProperty != null){
                 properties.add(parsedProperty)
@@ -68,7 +82,7 @@ internal class FLPropertyParserImpl : FLPropertyParser{
         try {
             val clazz = owner::class.java
 
-            clazz.declaredFields.forEach { field ->
+            getDeclaredFieldsUpToLevel2(clazz).forEach { field ->
                 field.isAccessible = true
                 val value = field.get(owner)
                 if(value != null){
