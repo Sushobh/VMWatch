@@ -8,6 +8,7 @@ import com.sushobh.fraglens.interceptors.FLStateFlowInterceptor
 import com.sushobh.fraglens.serializers.FLDataClassSerialzer
 import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.lang.reflect.Field
 
 internal class FLPropertyParserImpl : FLPropertyParser{
 
@@ -17,26 +18,23 @@ internal class FLPropertyParserImpl : FLPropertyParser{
     private val dataClassInterceptor = FLDataclassInterceptor(flDataClassSerialzer)
     private val liveDataInterceptor = FLLiveDataInterceptor(flDataClassSerialzer,flPrimitveSerialzer)
     private val stateFlowInterceptor = FLStateFlowInterceptor(flDataClassSerialzer,flPrimitveSerialzer)
-    
+    private val interceptors = FragLens.propertyInterceptors.toMutableList().apply {
+        add(stateFlowInterceptor)
+        add(liveDataInterceptor)
+        add(primitiveInterceptor)
+        add(dataClassInterceptor)
+    }
+
+
     override fun parseProperties(owner: Any): FLPropertyOwner {
         val properties = mutableListOf<FLProperty>()
         val clazz = owner::class.java
 
         clazz.declaredFields.forEach { field ->
-
-            val interceptors = FragLens.propertyInterceptors.toMutableList().apply {
-                add(stateFlowInterceptor)
-                add(liveDataInterceptor)
-                add(primitiveInterceptor)
-                add(dataClassInterceptor)
-            }
-
-            for(interceptor in interceptors){
-                val parsedProperty = interceptor.intercept(owner,field)
-                if(parsedProperty != null){
-                    properties.add(parsedProperty)
-                    return@forEach
-                }
+            val parsedProperty = parseField(owner,field,false)
+            if(parsedProperty != null){
+                properties.add(parsedProperty)
+                return@forEach
             }
         }
 
@@ -48,8 +46,46 @@ internal class FLPropertyParserImpl : FLPropertyParser{
         )
     }
 
+    private fun parseField(owner: Any, field: Field,fullFieldValue : Boolean) : FLProperty?{
+        for(interceptor in interceptors){
+            val parsedProperty = interceptor.intercept(owner,field,fullFieldValue)
+            if(parsedProperty != null){
+                return parsedProperty
+            }
+        }
+        return null
+    }
+
     override fun refresh(propertyOwner: FLPropertyOwner): FLPropertyOwner {
         return parseProperties(propertyOwner.ownerObject ?: return propertyOwner)
+    }
+
+    override fun serializeFieldOfViewModel(
+        owner: Any,
+        path: FLReferencePath
+    ): FLProperty? {
+
+        try {
+            val clazz = owner::class.java
+
+            clazz.declaredFields.forEach { field ->
+                field.isAccessible = true
+                val value = field.get(owner)
+                if(value != null){
+                    if(value.hashCode() == path[1]){
+                        val parsedProperty = parseField(owner,field,true)
+                        if(parsedProperty != null){
+                            return parsedProperty
+                        }
+                    }
+                }
+
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 
 }

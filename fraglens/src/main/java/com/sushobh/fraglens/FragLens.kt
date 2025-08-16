@@ -10,37 +10,40 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.ranrings.libs.androidapptorest.AndroidRestServer
 import com.ranrings.libs.androidapptorest.Base.GetRequestHandler
 import com.ranrings.libs.androidapptorest.Base.PostRequestHandler
-import com.sushobh.fraglens.interceptors.FLLiveDataInterceptor
-import com.sushobh.fraglens.interceptors.FLPrimitveInterceptor
-import com.sushobh.fraglens.interceptors.FLStateFlowInterceptor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 object FragLens : FragLensApi {
-    internal val propertyInterceptors = arrayListOf<FLPropertyParserInterceptor>()
+    internal var propertyInterceptors : List<FLPropertyParserInterceptor> = arrayListOf<FLPropertyParserInterceptor>()
     private val port = 56440;
     private var application: Application? = null
     private val activityStore = HashMap<Activity, List<Any>>()
     private val fragmentStore = HashMap<Fragment, List<Any>>()
     private var server: AndroidRestServer? = null
     private val _viewModelFlow = MutableStateFlow(emptyList<FLViewModelId>())
+    private lateinit var propertyParser : FLPropertyParser
     override val viewModelIdFlow = _viewModelFlow.asStateFlow()
 
     override fun parseProperties(flViewModelId: FLViewModelId): FLPropertyOwner? {
         val allViewModelStore = getAllViewModels()
         val viewModel =
             allViewModelStore.find { it.hashCode() == flViewModelId.code } ?: return null
-        val propertyParser = FLPropertyParserImpl()
         return propertyParser.parseProperties(viewModel)
     }
 
-    fun addPropertyInterceptor(interceptor: FLPropertyParserInterceptor) {
-        propertyInterceptors.add(interceptor)
+    override fun serializeFieldOfViewModel(referencePath: FLReferencePath): FLProperty? {
+        val allViewModelStore = getAllViewModels()
+        val viewModel =
+            allViewModelStore.find { it.hashCode() == referencePath[0] } ?: return null
+        return propertyParser.serializeFieldOfViewModel(viewModel,referencePath)
     }
 
 
-    fun init(application: Application) {
+
+    fun init(application: Application,config : FLConfig) {
         this.application = application
+        this.propertyInterceptors = config.interceptors
+        this.propertyParser = FLPropertyParserImpl()
         application.registerActivityLifecycleCallbacks(activityLifecycleCallback)
         startApiServer(application)
     }
@@ -135,6 +138,17 @@ object FragLens : FragLensApi {
                         return FLParserApiResponse(isSuccess = true, items = props.properties, viewmodelName = props.name)
                     }
                     return FLParserApiResponse(isSuccess = false, items = emptyList(), viewmodelName = requestBody.name)
+                }
+
+            }).addRequestHandler(object :
+                PostRequestHandler<FLReferencePath, Any>(FLReferencePath::class) {
+                override fun getMethodName(): String {
+                    return "getdetailsfromprop"
+                }
+
+                override fun onRequest(requestBody: FLReferencePath): Any {
+                    val result = serializeFieldOfViewModel(requestBody)
+                    return FLSerializeFieldResponse(isSuccess = result != null,result)
                 }
 
             }).startWebApp(false).build()

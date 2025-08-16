@@ -1,13 +1,15 @@
 package com.sushobh.fraglens.interceptors
 
 import com.sushobh.fraglens.FLProperty
+import com.sushobh.fraglens.FLReferencePath
 import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import java.lang.reflect.Field
 
 class FLPrimitveInterceptor(private val primtiveSerialzer: FLPrimitveSerialzer) : FLBasePropertyParserInterceptor() {
     override fun intercept(
         owner: Any,
-        field: Field
+        field: Field,
+        fullFieldValue : Boolean
     ): FLProperty? {
         field.isAccessible = true
 
@@ -27,13 +29,19 @@ class FLPrimitveInterceptor(private val primtiveSerialzer: FLPrimitveSerialzer) 
             value is Number ||
             value is Boolean
         ) {
-            val (short,long) = primtiveSerialzer.parseShortDisplayable(value)
+            val (short,long) = if(fullFieldValue){
+                primtiveSerialzer.parseFullDisplayable(value)
+            }
+            else {
+                primtiveSerialzer.parseShortDisplayable(value)
+            }
             return FLProperty(
                 name = field.name,
                 type = type.name,
                 value = short,
                 isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
-                fieldValue = long
+                fieldValue = long,
+                refPath = FLReferencePath(owner.hashCode(),value.hashCode())
             )
         }
         return null

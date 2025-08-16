@@ -6,6 +6,6 @@ class MyApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        FragLens.init(this)
+        FragLens.init(this, FLConfig(arrayListOf()))
     }
 }

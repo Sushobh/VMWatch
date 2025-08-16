@@ -1,6 +1,7 @@
 package com.sushobh.fraglens.interceptors
 
 import com.sushobh.fraglens.FLProperty
+import com.sushobh.fraglens.FLReferencePath
 import com.sushobh.fraglens.serializers.FLDataClassSerialzer
 import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import java.lang.reflect.Field
@@ -10,12 +11,10 @@ class FLStateFlowInterceptor(
 ) : FLBasePropertyParserInterceptor() {
     override fun intercept(
         owner: Any,
-        field: Field
+        field: Field,
+        fullFieldValue: Boolean
     ): FLProperty? {
         field.isAccessible = true
-
-        var fieldValue: String? = null
-        var displayValue: String? = null
 
         val value = field.get(owner)
         val type = field.type
@@ -44,22 +43,34 @@ class FLStateFlowInterceptor(
                 stateFlowValue is Number ||
                 stateFlowValue is Boolean
             ) {
-                val (short,long) = flPrimitveSerializer.parseShortDisplayable(stateFlowValue)
+                val (short,long) = if(fullFieldValue){
+                    flPrimitveSerializer.parseFullDisplayable(stateFlowValue)
+                }
+                else {
+                    flPrimitveSerializer.parseShortDisplayable(stateFlowValue)
+                }
                 return FLProperty(
                     name = field.name,
                     type = type.name,
                     value = short,
                     isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
-                    fieldValue = long
+                    fieldValue = long,
+                    refPath = FLReferencePath(owner.hashCode(),value.hashCode())
                 )
             } else if (kClass.isData) {
-                val (short,long) = flDataClassSerialzer.parseShortDisplayable(stateFlowValue)
+                val (short,long) = if(fullFieldValue){
+                    flDataClassSerialzer.parseFullDisplayable(stateFlowValue)
+                }
+                else {
+                    flDataClassSerialzer.parseShortDisplayable(stateFlowValue)
+                }
                 return FLProperty(
                     name = field.name,
                     type = type.name,
                     value = short,
                     isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
-                    fieldValue = long
+                    fieldValue = long,
+                    refPath = FLReferencePath(owner.hashCode(),value.hashCode())
                 )
             }
         }
