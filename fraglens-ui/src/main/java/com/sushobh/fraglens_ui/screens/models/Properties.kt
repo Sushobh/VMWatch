@@ -11,5 +11,6 @@ data class Property(
     val isMutable: Boolean,
     val name: String,
     val type: String,
-    val value: String
+    val value: String,
+    val refPath: com.sushobh.fraglens.FLReferencePath
 )

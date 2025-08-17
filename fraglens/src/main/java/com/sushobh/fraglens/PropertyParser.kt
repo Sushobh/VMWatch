@@ -1,125 +1,54 @@
 package com.sushobh.fraglens
 
 import androidx.lifecycle.MutableLiveData
+import com.sushobh.fraglens.interceptors.FLDataclassInterceptor
+import com.sushobh.fraglens.interceptors.FLLiveDataInterceptor
+import com.sushobh.fraglens.interceptors.FLPrimitveInterceptor
+import com.sushobh.fraglens.interceptors.FLStateFlowInterceptor
+import com.sushobh.fraglens.serializers.FLDataClassSerialzer
+import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.lang.reflect.Field
 
 internal class FLPropertyParserImpl : FLPropertyParser{
 
-    
+    private val flPrimitveSerialzer = FLPrimitveSerialzer()
+    private val flDataClassSerialzer = FLDataClassSerialzer()
+    private val primitiveInterceptor = FLPrimitveInterceptor(flPrimitveSerialzer)
+    private val dataClassInterceptor = FLDataclassInterceptor(flDataClassSerialzer)
+    private val liveDataInterceptor = FLLiveDataInterceptor(flDataClassSerialzer,flPrimitveSerialzer)
+    private val stateFlowInterceptor = FLStateFlowInterceptor(flDataClassSerialzer,flPrimitveSerialzer)
+    private val interceptors = FragLens.propertyInterceptors.toMutableList().apply {
+        add(stateFlowInterceptor)
+        add(liveDataInterceptor)
+        add(primitiveInterceptor)
+        add(dataClassInterceptor)
+    }
+
+    fun getDeclaredFieldsUpToLevel2(clazz: Class<*>): List<Field> {
+        val fields = mutableListOf<Field>()
+        var current: Class<*>? = clazz
+        var level = 0
+
+        while (current != null && level <= 2) {
+            fields += current.declaredFields
+            current = current.superclass
+            level++
+        }
+
+        return fields
+    }
+
+
     override fun parseProperties(owner: Any): FLPropertyOwner {
         val properties = mutableListOf<FLProperty>()
         val clazz = owner::class.java
 
-        clazz.declaredFields.forEach { field ->
-
-            val interceptors = FragLens.propertyInterceptors
-
-            for(interceptor in interceptors){
-                val parsedProperty = interceptor.intercept(owner,field)
-                if(parsedProperty != null){
-                    properties.add(parsedProperty)
-                    return@forEach
-                }
-            }
-
-
-            field.isAccessible = true
-            val value = field.get(owner)
-            val type = field.type
-
-            var fieldValue: String? = null
-            var displayValue: String? = null
-
-            val isLiveData = androidx.lifecycle.LiveData::class.java.isAssignableFrom(type)
-            val isStateFlow = try {
-                val stateFlowClass = Class.forName("kotlinx.coroutines.flow.StateFlow")
-                stateFlowClass.isAssignableFrom(type)
-            } catch (e: Exception) { false }
-
-            if (isLiveData) {
-                val liveDataValue = try {
-                    val getValueMethod = value?.javaClass?.getMethod("getValue")
-                    getValueMethod?.isAccessible = true
-                    getValueMethod?.invoke(value)
-                } catch (e: Exception) { null }
-
-                if (liveDataValue != null) {
-                    val kClass = liveDataValue::class
-                    if (kClass.java.isPrimitive ||
-                        liveDataValue is String ||
-                        liveDataValue is Number ||
-                        liveDataValue is Boolean
-                    ) {
-                        fieldValue = liveDataValue.toString()
-                        displayValue = liveDataValue.toString()
-                    } else if (kClass.isData) {
-                        fieldValue = liveDataValue.toString()
-                        displayValue = liveDataValue.toString()
-                    }
-                }
-                properties.add(
-                    FLProperty(
-                        name = field.name,
-                        type = type.name,
-                        value = displayValue,
-                        isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
-                        fieldValue = fieldValue
-                    )
-                )
-            } else if (isStateFlow) {
-                val stateFlowValue = try {
-                    val getValueMethod = value?.javaClass?.getMethod("getValue")
-                    getValueMethod?.isAccessible = true
-                    getValueMethod?.invoke(value)
-                } catch (e: Exception) { null }
-
-                if (stateFlowValue != null) {
-                    val kClass = stateFlowValue::class
-                    if (kClass.java.isPrimitive ||
-                        stateFlowValue is String ||
-                        stateFlowValue is Number ||
-                        stateFlowValue is Boolean
-                    ) {
-                        fieldValue = stateFlowValue.toString()
-                        displayValue = stateFlowValue.toString()
-                    } else if (kClass.isData) {
-                        fieldValue = stateFlowValue.toString()
-                        displayValue = stateFlowValue.toString()
-                    }
-                }
-                properties.add(
-                    FLProperty(
-                        name = field.name,
-                        type = type.name,
-                        value = displayValue,
-                        isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
-                        fieldValue = fieldValue
-                    )
-                )
-            } else if (value != null) {
-                val kClass = value::class
-                if (kClass.java.isPrimitive ||
-                    value is String ||
-                    value is Number ||
-                    value is Boolean
-                ) {
-                    fieldValue = value.toString()
-                    displayValue = value.toString()
-                } else if (kClass.isData) {
-                    fieldValue = value.toString()
-                    displayValue = value.toString()
-                }
-                if (fieldValue != null) {
-                    properties.add(
-                        FLProperty(
-                            name = field.name,
-                            type = type.name,
-                            value = displayValue,
-                            isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
-                            fieldValue = fieldValue
-                        )
-                    )
-                }
+        getDeclaredFieldsUpToLevel2(clazz).forEach { field ->
+            val parsedProperty = parseField(owner,field,false)
+            if(parsedProperty != null){
+                properties.add(parsedProperty)
+                return@forEach
             }
         }
 
@@ -131,9 +60,46 @@ internal class FLPropertyParserImpl : FLPropertyParser{
         )
     }
 
+    private fun parseField(owner: Any, field: Field,fullFieldValue : Boolean) : FLProperty?{
+        for(interceptor in interceptors){
+            val parsedProperty = interceptor.intercept(owner,field,fullFieldValue)
+            if(parsedProperty != null){
+                return parsedProperty
+            }
+        }
+        return null
+    }
+
     override fun refresh(propertyOwner: FLPropertyOwner): FLPropertyOwner {
         return parseProperties(propertyOwner.ownerObject ?: return propertyOwner)
     }
 
+    override fun serializeFieldOfViewModel(
+        owner: Any,
+        path: FLReferencePath
+    ): FLProperty? {
+
+        try {
+            val clazz = owner::class.java
+
+            getDeclaredFieldsUpToLevel2(clazz).forEach { field ->
+                field.isAccessible = true
+                val value = field.get(owner)
+                if(value != null){
+                    if(value.hashCode() == path[1]){
+                        val parsedProperty = parseField(owner,field,true)
+                        if(parsedProperty != null){
+                            return parsedProperty
+                        }
+                    }
+                }
+
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
+    }
 
 }

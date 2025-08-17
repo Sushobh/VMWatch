@@ -2,9 +2,26 @@ package com.sushobh.fraglens
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.sushobh.fraglens.TestViewModel.Person
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class TestViewModel : ViewModel() {
+
+
+
+
+open class BaseViewModel : ViewModel() {
+    private val personFlow0 = MutableStateFlow(
+        Person("John Doe", 30, true)
+    )
+    private val stateFlow0 = MutableStateFlow(false)
+    private val liveData0 = MutableLiveData(false)
+
+    private var someText0 = "Hello, World!"
+    private val soomBool0 = false
+    private val sumInt0 = 412
+}
+
+class TestViewModel : BaseViewModel() {
 
     data class Person(
         val name: String,

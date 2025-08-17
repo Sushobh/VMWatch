@@ -48,7 +48,6 @@ class FraglensActivity : ComponentActivity() {
             ComposeBasicTheme {
                 NavHost(navController, startDestination = "Home") {
                     composable("Home") { MyAppHomeScreen(navController) }
-                   // composable("Detail") { DetailsScreen(navController) }
 
                     composable("Detail/{listAsJson}",
                         arguments = listOf(navArgument("listAsJson") { defaultValue = "[]" })
@@ -96,7 +95,6 @@ fun MyAppHomeScreen(navController: NavController) {
                             val props = FragLens.parseProperties(it)
                             val jsonString = gson.toJson(props)
                             navController.navigate("Detail/$jsonString")
-                            //navController.navigate("Detail")
                         }),
                     shape = MaterialTheme.shapes.large,
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -109,33 +107,6 @@ fun MyAppHomeScreen(navController: NavController) {
                     }
                 }
             }
-        }
-    }
-}
-
-
-@Composable
-fun HomeScreen(flData: FLViewModelId, navController: NavController) {
-    /*val gson = remember { Gson() }
-    val type = object : TypeToken<List<String>>() {}.type
-    val listJson: List<FLViewModelId> = gson.fromJson(listJson, type)*/
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .clickable(onClick = {
-                val props = FragLens.parseProperties(flData)
-                navController.navigate("Detail")
-            }),
-        shape = MaterialTheme.shapes.large,
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = flData.name,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
-            )
         }
     }
 }
