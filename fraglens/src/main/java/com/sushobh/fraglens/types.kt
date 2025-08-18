@@ -28,8 +28,6 @@ data class FLPropertyOwner(
     }
 }
 
-data class FLReflectionProperty(private val field : Field,private val owner : Any)
-
 
 interface FLPropertyParser {
     fun parseProperties(owner: Any): FLPropertyOwner
