@@ -5,7 +5,7 @@ import com.sushobh.fraglens.FLReferencePath
 import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import java.lang.reflect.Field
 
-class FLPrimitveInterceptor(private val primtiveSerialzer: FLPrimitveSerialzer) : FLBasePropertyParserInterceptor() {
+internal class FLPrimitveInterceptor(private val primtiveSerialzer: FLPrimitveSerialzer) : FLBasePropertyParserInterceptor() {
     override fun intercept(
         owner: Any,
         field: Field,
