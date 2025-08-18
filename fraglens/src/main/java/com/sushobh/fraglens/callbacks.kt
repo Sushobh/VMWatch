@@ -12,7 +12,7 @@ import androidx.fragment.app.FragmentManager
 internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
 
     override fun onActivityCreated(p0: Activity, p1: Bundle?) {
-
+        addFragmentCallback(p0)
     }
 
 
