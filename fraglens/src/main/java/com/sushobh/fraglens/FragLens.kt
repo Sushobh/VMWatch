@@ -119,7 +119,7 @@ object FragLens : FragLensApi {
             .addRequestHandler(object : GetRequestHandler<Any>() {
 
                 override fun onGetRequest(uri: String): Any {
-                    return viewModelIdFlow.value
+                    return viewModelIdFlow.value.sortedBy { it.name }
                 }
 
                 override fun getMethodName(): String {
@@ -135,7 +135,7 @@ object FragLens : FragLensApi {
                 override fun onRequest(requestBody: FLViewModelId): Any {
                     val props = parseProperties(requestBody)
                     if (props != null) {
-                        return FLParserApiResponse(isSuccess = true, items = props.properties, viewmodelName = props.name)
+                        return FLParserApiResponse(isSuccess = true, items = props.properties.sortedBy { it.name }, viewmodelName = props.name)
                     }
                     return FLParserApiResponse(isSuccess = false, items = emptyList(), viewmodelName = requestBody.name)
                 }
