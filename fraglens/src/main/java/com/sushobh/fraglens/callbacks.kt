@@ -21,7 +21,7 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
     }
 
     override fun onActivityResumed(p0: Activity) {
-        FragLens.onStartedActivity(p0 as ComponentActivity)
+        FragLens.onResumedActivity(p0 as ComponentActivity)
     }
 
     override fun onActivityPaused(p0: Activity) {
@@ -37,7 +37,7 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
 
     override fun onActivityDestroyed(p0: Activity) {
         removeFragmentCallback(p0)
-        FragLens.onStopActivity(p0 as ComponentActivity)
+        FragLens.onDestroyActivity(p0 as ComponentActivity)
     }
 
     private fun addFragmentCallback(p0: Activity) {
@@ -70,7 +70,7 @@ internal object FragmentLifeCycleCallback : FragmentManager.FragmentLifecycleCal
 
     override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
         super.onFragmentResumed(fm, f)
-        FragLens.onStartedFragment(f)
+        FragLens.onResumedFragment(f)
     }
 
     override fun onFragmentPaused(fm: FragmentManager, f: Fragment) {
@@ -84,7 +84,7 @@ internal object FragmentLifeCycleCallback : FragmentManager.FragmentLifecycleCal
 
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
         super.onFragmentDestroyed(fm, f)
-        FragLens.onStopFragment(f)
+        FragLens.onDestroyFragment(f)
     }
 
     override fun onFragmentDetached(fm: FragmentManager, f: Fragment) {

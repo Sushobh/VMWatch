@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 object FragLens : FragLensApi {
-    internal var propertyInterceptors : List<FLPropertyParserInterceptor> = arrayListOf<FLPropertyParserInterceptor>()
+    internal var propertyInterceptors : List<FLPropertyParserInterceptor> = arrayListOf()
     private val port = 56440;
     private var application: Application? = null
     private val activityStore = HashMap<Activity, List<Any>>()
@@ -25,16 +25,24 @@ object FragLens : FragLensApi {
     override val viewModelIdFlow = _viewModelFlow.asStateFlow()
 
     override fun parseProperties(flViewModelId: FLViewModelId): FLPropertyOwner? {
-        val allViewModelStore = getAllViewModels()
-        val viewModel =
-            allViewModelStore.find { it.hashCode() == flViewModelId.code } ?: return null
+        val allViewModelStore = getAllViewModelsIds()
+        val viewModelId =
+            allViewModelStore.find { it.code == flViewModelId.code } ?: return null
+        val viewModel = getAllViewModels().find { it.hashCode() == viewModelId.code }
+        if(viewModel == null){
+            return null
+        }
         return propertyParser.parseProperties(viewModel)
     }
 
     override fun serializeFieldOfViewModel(referencePath: FLReferencePath): FLProperty? {
-        val allViewModelStore = getAllViewModels()
-        val viewModel =
-            allViewModelStore.find { it.hashCode() == referencePath[0] } ?: return null
+        val allViewModelStore = getAllViewModelsIds()
+        val viewModelId =
+            allViewModelStore.find { it.code == referencePath[0] } ?: return null
+        val viewModel = getAllViewModels().find { it.hashCode() == viewModelId.code }
+        if(viewModel == null){
+            return null
+        }
         return propertyParser.serializeFieldOfViewModel(viewModel,referencePath)
     }
 
@@ -57,45 +65,58 @@ object FragLens : FragLensApi {
     }
 
 
-    internal fun onStartedActivity(activity: androidx.activity.ComponentActivity) {
-        val viewModels = getAllViewModels(activity)
+    internal fun onResumedActivity(activity: androidx.activity.ComponentActivity) {
+        val viewModels = getAllViewModelsIds(activity)
         activityStore[activity] = viewModels
         updateFlow()
     }
 
-    internal fun onStopActivity(activity: androidx.activity.ComponentActivity) {
+    internal fun onDestroyActivity(activity: androidx.activity.ComponentActivity) {
         activityStore.remove(activity)
         updateFlow()
     }
 
-    internal fun onStartedFragment(fragment: Fragment) {
-        val viewModels = getAllViewModels(fragment)
+    internal fun onResumedFragment(fragment: Fragment) {
+        val viewModels = getAllViewModelsIds(fragment)
         fragmentStore[fragment] = viewModels
         updateFlow()
     }
 
-    internal fun onStopFragment(fragment: Fragment) {
+    internal fun onDestroyFragment(fragment: Fragment) {
         fragmentStore.remove(fragment)
         updateFlow()
     }
 
     private fun updateFlow() {
-        _viewModelFlow.value =
-            getAllViewModels().map { FLViewModelId(it.hashCode(), it::class.java.simpleName) }
+        _viewModelFlow.value = getAllViewModelsIds()
     }
 
-    private fun getAllViewModels(): List<ViewModel> {
-        val viewModels = mutableListOf<ViewModel>()
-        activityStore.values.forEach {
-            viewModels.addAll(it as Collection<ViewModel>)
+    private fun getAllViewModels() : List<ViewModel> {
+        return (activityStore.values + fragmentStore.values).flatten() as List<ViewModel>
+    }
+
+    private fun getAllViewModelsIds(): List<FLViewModelId> {
+        val viewModels = mutableListOf<FLViewModelId>()
+        activityStore.forEach { entry ->
+            val viewModelList = (entry.value as Collection<ViewModel>).map {
+                FLViewModelId(it.hashCode(),
+                    it.javaClass.simpleName,entry.key.javaClass.simpleName,entry.key.hashCode(),
+                    FLViewModelOwnerType.Activity.name)
+            }
+            viewModels.addAll(viewModelList)
         }
-        fragmentStore.values.forEach {
-            viewModels.addAll(it as Collection<ViewModel>)
+        fragmentStore.forEach { entry ->
+            val viewModelList = (entry.value as Collection<ViewModel>).map {
+                FLViewModelId(it.hashCode(),
+                    it.javaClass.simpleName,entry.key.javaClass.simpleName,entry.key.hashCode(),
+                    FLViewModelOwnerType.Fragment.name)
+            }
+            viewModels.addAll(viewModelList)
         }
         return viewModels
     }
 
-    internal fun getAllViewModels(owner: ViewModelStoreOwner): List<ViewModel> {
+    internal fun getAllViewModelsIds(owner: ViewModelStoreOwner): List<ViewModel> {
         return try {
 
             val storeField = ViewModelStoreOwner::class.java.getDeclaredMethod("getViewModelStore")
