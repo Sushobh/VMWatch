@@ -6,7 +6,7 @@ import com.sushobh.fraglens.serializers.FLDataClassSerialzer
 import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import java.lang.reflect.Field
 
-class FLLiveDataInterceptor(private val flDataClassSerialzer: FLDataClassSerialzer,private val flPrimitveSerializer: FLPrimitveSerialzer) : FLBasePropertyParserInterceptor() {
+internal class FLLiveDataInterceptor(private val flDataClassSerialzer: FLDataClassSerialzer,private val flPrimitveSerializer: FLPrimitveSerialzer) : FLBasePropertyParserInterceptor() {
     override fun intercept(
         owner: Any,
         field: Field,

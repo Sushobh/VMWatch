@@ -28,8 +28,6 @@ data class FLPropertyOwner(
     }
 }
 
-data class FLReflectionProperty(private val field : Field,private val owner : Any)
-
 
 interface FLPropertyParser {
     fun parseProperties(owner: Any): FLPropertyOwner
@@ -48,7 +46,14 @@ interface FragLensApi {
     fun serializeFieldOfViewModel(referencePath : FLReferencePath) : FLProperty?
 }
 
-data class FLViewModelId(val code : Int,val name : String)
+sealed class FLViewModelOwnerType(val name : String) {
+    data object Activity : FLViewModelOwnerType("Activity")
+    data object Fragment : FLViewModelOwnerType("Fragment")
+}
+
+
+data class FLViewModelId(val code : Int,val name : String,
+                         val ownerName : String,val ownerCode : Int,val ownerType : String)
 
 data class FLParserApiResponse(val isSuccess : Boolean = false,val items : List<FLProperty> = emptyList(), val viewmodelName : String)
 data class FLSerializeFieldResponse(val isSuccess : Boolean = false,val value : FLProperty? = null)
