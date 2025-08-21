@@ -1,4 +1,6 @@
-package com.sushobh.fraglens_ui.screens.models
+package com.sushobh.fraglens_ui.models
+
+import com.sushobh.fraglens.FLReferencePath
 
 data class TestViewModel(
     val name: String,
@@ -12,5 +14,5 @@ data class Property(
     val name: String,
     val type: String,
     val value: String,
-    val refPath: com.sushobh.fraglens.FLReferencePath
+    val refPath: FLReferencePath
 )

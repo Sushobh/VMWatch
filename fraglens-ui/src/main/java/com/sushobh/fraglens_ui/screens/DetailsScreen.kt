@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.gson.Gson
 import com.sushobh.fraglens.FragLens
-import com.sushobh.fraglens_ui.screens.models.TestViewModel
-import com.sushobh.fraglens_ui.screens.theme.GreenJC
+import com.sushobh.fraglens_ui.models.TestViewModel
+import com.sushobh.fraglens_ui.theme.GreenJC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
