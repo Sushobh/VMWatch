@@ -23,6 +23,7 @@ object FragLens : FragLensApi {
     private val _viewModelFlow = MutableStateFlow(emptyList<FLViewModelId>())
     private lateinit var propertyParser : FLPropertyParser
     override val viewModelIdFlow = _viewModelFlow.asStateFlow()
+    private var listener : FLCurrentActivityListener? = null
 
     override fun parseProperties(flViewModelId: FLViewModelId): FLPropertyOwner? {
         val allViewModelStore = getAllViewModelsIds()
@@ -47,6 +48,9 @@ object FragLens : FragLensApi {
     }
 
 
+    fun setActivityLifecycleListener(listener: FLCurrentActivityListener){
+        this.listener = listener
+    }
 
     fun init(application: Application,config : FLConfig) {
         this.application = application
@@ -66,9 +70,14 @@ object FragLens : FragLensApi {
 
 
     internal fun onResumedActivity(activity: androidx.activity.ComponentActivity) {
-        val viewModels = getAllViewModelsIds(activity)
+        val viewModels = getAllViewModels(activity)
         activityStore[activity] = viewModels
+        listener?.onResumed(activity)
         updateFlow()
+    }
+
+    internal fun onPausedActivity(activity: androidx.activity.ComponentActivity) {
+        listener?.onPaused(activity)
     }
 
     internal fun onDestroyActivity(activity: androidx.activity.ComponentActivity) {
@@ -77,7 +86,7 @@ object FragLens : FragLensApi {
     }
 
     internal fun onResumedFragment(fragment: Fragment) {
-        val viewModels = getAllViewModelsIds(fragment)
+        val viewModels = getAllViewModels(fragment)
         fragmentStore[fragment] = viewModels
         updateFlow()
     }
@@ -116,7 +125,7 @@ object FragLens : FragLensApi {
         return viewModels
     }
 
-    internal fun getAllViewModelsIds(owner: ViewModelStoreOwner): List<ViewModel> {
+    internal fun getAllViewModels(owner: ViewModelStoreOwner): List<ViewModel> {
         return try {
 
             val storeField = ViewModelStoreOwner::class.java.getDeclaredMethod("getViewModelStore")

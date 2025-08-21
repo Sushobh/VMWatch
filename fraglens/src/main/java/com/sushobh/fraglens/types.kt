@@ -75,5 +75,9 @@ data class FLReferencePath(val viewModelCode : Int,val fieldCode : Int) {
         if(index == 1) return fieldCode
         return -1
     }
+}
 
+interface FLCurrentActivityListener {
+    fun onResumed(activity : androidx.activity.ComponentActivity)
+    fun onPaused(activity : androidx.activity.ComponentActivity)
 }
