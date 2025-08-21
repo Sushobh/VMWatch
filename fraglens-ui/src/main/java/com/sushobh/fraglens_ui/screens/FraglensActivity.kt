@@ -1,6 +1,5 @@
 package com.sushobh.fraglens_ui.screens
 
-import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
@@ -36,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
@@ -45,7 +43,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.sushobh.fraglens.FLViewModelId
 import com.sushobh.fraglens.FragLens
 import com.sushobh.fraglens_ui.models.ListItem
 import com.sushobh.fraglens_ui.models.OwnerGroup
@@ -68,10 +65,7 @@ class FraglensActivity : ComponentActivity() {
                         val itemType = object : TypeToken<List<ListItem>>() {}.type
                         val items: List<ListItem> = gson.fromJson(jsonString, itemType)
                         val grouped = groupItemsByOwner(items)
-                        val activity = LocalActivity.current as ComponentActivity
-                        val overlay =  InAppOverlay(activity)
                         ExpandableGroupedList(grouped) { clicked ->
-                            overlay.showOverlay()
                             /*val flViewModelId = FLViewModelId(
                                 clicked.code,
                                 clicked.name,

@@ -2,14 +2,11 @@ package com.sushobh.fraglens_ui.screens
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import android.widget.Button
-import androidx.core.content.ContextCompat.startActivity
 import com.sushobh.fraglens.ui.R
 
 class InAppOverlay(private val activity: Activity) {

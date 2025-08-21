@@ -25,7 +25,7 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
     }
 
     override fun onActivityPaused(p0: Activity) {
-
+        FragLens.onPausedActivity(p0 as ComponentActivity)
     }
 
     override fun onActivityStopped(p0: Activity) {
