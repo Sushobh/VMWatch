@@ -26,7 +26,7 @@
         </activity>
 
         <activity
-            android:name="com.sushobh.fraglens_ui.screens.FragLensActivity"
+            android:name="com.sushobh.fraglens_ui.screens.FraglensActivity"
             android:exported="true"/>
     </application>
 

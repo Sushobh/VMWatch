@@ -108,5 +108,6 @@ class SafeGson private constructor(
             if (depth > 0) depth--
             return super.endArray()
         }
+
     }
 }
