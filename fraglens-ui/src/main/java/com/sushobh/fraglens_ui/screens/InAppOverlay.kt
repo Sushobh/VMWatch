@@ -2,43 +2,59 @@ package com.sushobh.fraglens_ui.screens
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import com.sushobh.fraglens.ui.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class InAppOverlay(private val activity: Activity) {
+class InAppOverlay() {
 
-    private var windowManager: WindowManager? = null
+    private val scope : CoroutineScope = CoroutineScope(Dispatchers.Main)
     private var overlayView: View? = null
 
-    fun showOverlay() {
-        if (overlayView != null) return // already showing
+    fun showOverlay(activity: Activity) {
+        if(activity is FraglensActivity){
+            return
+        }
 
-        windowManager = activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        scope.launch {
+            val windowManager = activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
-        overlayView = LayoutInflater.from(activity).inflate(R.layout.overlay_layout, null)
+            overlayView = LayoutInflater.from(activity).inflate(R.layout.overlay_layout, null)
 
-        val layoutParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_PANEL, // stays inside your app
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        )
+            val layoutParams = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION, // stays inside your app
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            )
 
-        layoutParams.gravity = Gravity.TOP
-        layoutParams.token = activity.window.decorView.windowToken // tie to app window
-
-        windowManager?.addView(overlayView, layoutParams)
+            layoutParams.gravity = Gravity.BOTTOM.or(Gravity.RIGHT)
+            //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       layoutParams.token = activity.window.decorView.windowToken // tie to app window
+            overlayView?.setOnClickListener {
+                activity.startActivity(Intent(activity,FraglensActivity::class.java))
+            }
+            windowManager.addView(overlayView, layoutParams)
+        }
     }
 
-    fun removeOverlay() {
-        if (overlayView != null) {
-            windowManager?.removeView(overlayView)
-            overlayView = null
+    fun removeOverlay(activity: Activity) {
+        if(activity is FraglensActivity){
+            return
+        }
+        scope.launch {
+            if (overlayView != null) {
+                val windowManager = activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                windowManager.removeView(overlayView)
+                overlayView = null
+            }
         }
     }
 }

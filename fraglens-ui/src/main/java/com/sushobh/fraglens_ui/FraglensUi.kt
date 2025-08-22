@@ -8,18 +8,17 @@ import com.sushobh.fraglens.FragLens
 import com.sushobh.fraglens_ui.screens.InAppOverlay
 
 object FraglensUi {
-    var overlay : InAppOverlay? = null
+    val overlay : InAppOverlay = InAppOverlay()
 
     fun initStart(app: Application, config: FLConfig) {
         FragLens.init(app, config)
         FragLens.setActivityLifecycleListener(object : FLCurrentActivityListener {
             override fun onResumed(activity: ComponentActivity) {
-                overlay = InAppOverlay(activity)
-                overlay?.showOverlay()
+                overlay.showOverlay(activity)
             }
 
             override fun onPaused(activity: ComponentActivity) {
-                overlay?.removeOverlay()
+                overlay.removeOverlay(activity)
             }
 
         })
