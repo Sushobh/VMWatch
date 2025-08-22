@@ -34,7 +34,7 @@ import com.sushobh.fraglens_ui.theme.GreenJC
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailsScreen(navController: NavController, json: String) {
+fun DetailsScreen(json: String, onBack: () -> Unit, onClose: () -> Unit) {
     val gson = remember { Gson() }
     var showDialog by remember { mutableStateOf(false) }
     var propertyFlData by remember { mutableStateOf<String>("") }
@@ -47,29 +47,11 @@ fun DetailsScreen(navController: NavController, json: String) {
         )
     } else {
         val testModelList = gson.fromJson(json, TestViewModel::class.java)
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Details") },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    }, colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = GreenJC,
-                        titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White
-                    )
-                )
-            }
-        ) { innerPadding ->
+        ScreenWithTopBar(title = "Details", onBack = onBack, onClose = onClose) { padding ->
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(padding)
             ) {
                 items(testModelList.properties) { property ->
                     Row(
@@ -83,10 +65,12 @@ fun DetailsScreen(navController: NavController, json: String) {
                         )
                         Text(
                             text = property.value,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .weight(1f)
                                 .clickable(onClick = {
                                     showDialog = true
-                                    propertyFlData  = FragLens.serializeFieldOfViewModel(property.refPath)?.fieldValue.orEmpty()
+                                    propertyFlData =
+                                        FragLens.serializeFieldOfViewModel(property.refPath)?.fieldValue.orEmpty()
                                 })
                         )
                     }
