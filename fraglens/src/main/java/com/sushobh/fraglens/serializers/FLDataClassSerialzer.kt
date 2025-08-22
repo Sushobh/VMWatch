@@ -6,7 +6,7 @@ import com.sushobh.fraglens.FLPropertySerialzer
 
 class FLDataClassSerialzer : FLPropertySerialzer {
     override fun parseFullDisplayable(value: Any): FLDisplayableValue {
-        return FLDisplayableValue("Click to show",value.toString())
+        return FLDisplayableValue("Click to show", SafeGson.toJson(obj = value, maxSize = 20000))
     }
 
     override fun parseShortDisplayable(value: Any): FLDisplayableValue {

@@ -45,6 +45,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(kotlin("reflect"))
     implementation("com.sushobh:androidrestserver:1.0.0")
+    implementation(libs.gson.v2131)
 }
 
 

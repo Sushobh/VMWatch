@@ -1,5 +1,6 @@
 package com.sushobh.fraglens
 
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.sushobh.fraglens.TestViewModel.Person
@@ -15,13 +16,15 @@ open class BaseViewModel : ViewModel() {
     )
     private val stateFlow0 = MutableStateFlow(false)
     private val liveData0 = MutableLiveData(false)
-
     private var someText0 = "Hello, World!"
     private val soomBool0 = false
     private val sumInt0 = 412
 }
 
 class TestViewModel : BaseViewModel() {
+
+
+    data class ActivityHolder(val activity : ComponentActivity? = null)
 
     data class Person(
         val name: String,
@@ -34,7 +37,7 @@ class TestViewModel : BaseViewModel() {
     )
     private val stateFlow = MutableStateFlow(false)
     private val liveData = MutableLiveData(false)
-
+    private val activityFlow = MutableStateFlow<ActivityHolder?>(null)
     private var someText = "Hello, World!"
     private val soomBool = false
     private val sumInt = 412
@@ -43,4 +46,8 @@ class TestViewModel : BaseViewModel() {
         age = 25,
         isEmployed = false
     )
+
+    fun setActivity(componentActivity: ComponentActivity){
+        activityFlow.value = ActivityHolder(componentActivity)
+    }
 }

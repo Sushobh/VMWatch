@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
@@ -15,6 +17,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         vm.toString()
-        startActivity(Intent(this, com.sushobh.fraglens_ui.screens.FragLensActivity::class.java))
+
+        lifecycleScope.launch {
+            vm.setActivity(this@MainActivity)
+        }
     }
 }
