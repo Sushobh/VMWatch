@@ -2,10 +2,12 @@ package com.sushobh.fraglens
 
 import androidx.lifecycle.MutableLiveData
 import com.sushobh.fraglens.interceptors.FLDataclassInterceptor
+import com.sushobh.fraglens.interceptors.FLIterableInterceptor
 import com.sushobh.fraglens.interceptors.FLLiveDataInterceptor
 import com.sushobh.fraglens.interceptors.FLPrimitveInterceptor
 import com.sushobh.fraglens.interceptors.FLStateFlowInterceptor
 import com.sushobh.fraglens.serializers.FLDataClassSerialzer
+import com.sushobh.fraglens.serializers.FLIterableSerializer
 import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.lang.reflect.Field
@@ -14,15 +16,18 @@ internal class FLPropertyParserImpl : FLPropertyParser{
 
     private val flPrimitveSerialzer = FLPrimitveSerialzer()
     private val flDataClassSerialzer = FLDataClassSerialzer()
+    private val flIterableSerializer = FLIterableSerializer()
     private val primitiveInterceptor = FLPrimitveInterceptor(flPrimitveSerialzer)
     private val dataClassInterceptor = FLDataclassInterceptor(flDataClassSerialzer)
     private val liveDataInterceptor = FLLiveDataInterceptor(flDataClassSerialzer,flPrimitveSerialzer)
     private val stateFlowInterceptor = FLStateFlowInterceptor(flDataClassSerialzer,flPrimitveSerialzer)
+    private val iterableInterceptor = FLIterableInterceptor(flIterableSerializer)
     private val interceptors = FragLens.propertyInterceptors.toMutableList().apply {
         add(stateFlowInterceptor)
         add(liveDataInterceptor)
         add(primitiveInterceptor)
         add(dataClassInterceptor)
+        add(iterableInterceptor)
     }
 
     fun getDeclaredFieldsUpToLevel2(clazz: Class<*>): List<Field> {
