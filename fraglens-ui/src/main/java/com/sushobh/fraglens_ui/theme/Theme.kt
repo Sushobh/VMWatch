@@ -1,4 +1,4 @@
-package com.sushobh.fraglens_ui.screens.theme
+package com.sushobh.fraglens_ui.theme
 
 import android.app.Activity
 import android.os.Build

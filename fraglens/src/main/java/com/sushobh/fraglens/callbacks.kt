@@ -7,12 +7,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 
 internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
 
     override fun onActivityCreated(p0: Activity, p1: Bundle?) {
-
+        addFragmentCallback(p0)
     }
 
 
@@ -21,15 +22,14 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
     }
 
     override fun onActivityResumed(p0: Activity) {
-        FragLens.onStartedActivity(p0 as ComponentActivity)
+        FragLens.onResumedActivity(p0 as ComponentActivity)
     }
 
     override fun onActivityPaused(p0: Activity) {
-
+        FragLens.onPausedActivity(p0 as ComponentActivity)
     }
 
     override fun onActivityStopped(p0: Activity) {
-        FragLens.onStopActivity(p0 as ComponentActivity)
     }
 
     override fun onActivitySaveInstanceState(p0: Activity, p1: Bundle) {
@@ -38,11 +38,11 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
 
     override fun onActivityDestroyed(p0: Activity) {
         removeFragmentCallback(p0)
-
+        FragLens.onDestroyActivity(p0 as ComponentActivity)
     }
 
     private fun addFragmentCallback(p0: Activity) {
-        if (p0 is AppCompatActivity) {
+        if (p0 is FragmentActivity) {
             p0.supportFragmentManager.registerFragmentLifecycleCallbacks(
                 FragmentLifeCycleCallback,
                 true
@@ -51,7 +51,7 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
     }
 
     private fun removeFragmentCallback(p0: Activity) {
-        if (p0 is AppCompatActivity) {
+        if (p0 is FragmentActivity) {
             p0.supportFragmentManager.unregisterFragmentLifecycleCallbacks(FragmentLifeCycleCallback)
         }
     }
@@ -71,7 +71,7 @@ internal object FragmentLifeCycleCallback : FragmentManager.FragmentLifecycleCal
 
     override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
         super.onFragmentResumed(fm, f)
-        FragLens.onStartedFragment(f)
+        FragLens.onResumedFragment(f)
     }
 
     override fun onFragmentPaused(fm: FragmentManager, f: Fragment) {
@@ -80,11 +80,12 @@ internal object FragmentLifeCycleCallback : FragmentManager.FragmentLifecycleCal
 
     override fun onFragmentStopped(fm: FragmentManager, f: Fragment) {
         super.onFragmentStopped(fm, f)
-        FragLens.onStopFragment(f)
+
     }
 
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {
         super.onFragmentDestroyed(fm, f)
+        FragLens.onDestroyFragment(f)
     }
 
     override fun onFragmentDetached(fm: FragmentManager, f: Fragment) {

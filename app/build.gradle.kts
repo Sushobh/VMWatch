@@ -3,9 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
-
+val nav_version = "2.9.3"
 android {
-    namespace = "com.sushobh.fraglens"
+    namespace = "com.sushobh.fraglens.main"
     compileSdk = 35
 
     defaultConfig {
@@ -56,7 +56,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
+    implementation("androidx.navigation:navigation-fragment:${nav_version}")
+    implementation("androidx.navigation:navigation-ui:${nav_version}")     // Or the latest version
     implementation(project(":fraglens"))
     implementation(project(":fraglens-ui"))
 }

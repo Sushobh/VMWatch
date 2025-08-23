@@ -1,8 +1,11 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id("com.vanniktech.maven.publish")
 }
-
+val nav_version = "2.9.3"
 android {
     namespace = "com.sushobh.fraglens"
     compileSdk = 35
@@ -42,4 +45,43 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(kotlin("reflect"))
     implementation("com.sushobh:androidrestserver:1.0.0")
+    implementation(libs.gson.v2131)
+    implementation("androidx.navigation:navigation-fragment:${nav_version}")
+    implementation("androidx.navigation:navigation-ui:${nav_version}")
+}
+
+
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+}
+
+mavenPublishing {
+    coordinates("com.sushobh", "fraglens", "0.1.6")
+
+    pom {
+        name.set("Frag Lens")
+        description.set("Library to trace viewmodel properties using reflection")
+        inceptionYear.set("2025")
+        url.set("https://github.com/Sushobh/VMWatch")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("sushobh")
+                name.set("Sushobh")
+                url.set("https://github.com/sushobh/")
+            }
+        }
+        scm {
+            url.set("https://github.com/Sushobh/VMWatch")
+            connection.set("scm:git:git://github.com/sushobh/VMWatch.git")
+            developerConnection.set("scm:git:ssh://git@github.com/Sushobh/VMWatch.git")
+        }
+    }
 }

@@ -7,37 +7,62 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.navigation.NavGraph
+import androidx.navigation.Navigation
 import com.ranrings.libs.androidapptorest.AndroidRestServer
 import com.ranrings.libs.androidapptorest.Base.GetRequestHandler
 import com.ranrings.libs.androidapptorest.Base.PostRequestHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 
 object FragLens : FragLensApi {
-    internal val propertyInterceptors = arrayListOf<FLPropertyParserInterceptor>()
-    private val port = 56777;
+    internal var propertyInterceptors : List<FLPropertyParserInterceptor> = arrayListOf()
+    private val port = 56440;
     private var application: Application? = null
     private val activityStore = HashMap<Activity, List<Any>>()
     private val fragmentStore = HashMap<Fragment, List<Any>>()
     private var server: AndroidRestServer? = null
     private val _viewModelFlow = MutableStateFlow(emptyList<FLViewModelId>())
+    private lateinit var propertyParser : FLPropertyParser
     override val viewModelIdFlow = _viewModelFlow.asStateFlow()
+    private var listener : FLCurrentActivityListener? = null
 
     override fun parseProperties(flViewModelId: FLViewModelId): FLPropertyOwner? {
-        val allViewModelStore = getAllViewModels()
-        val viewModel =
-            allViewModelStore.find { it.hashCode() == flViewModelId.code } ?: return null
-        val propertyParser = FLPropertyParserImpl()
+        val allViewModelStore = getAllViewModelsIds()
+        val viewModelId =
+            allViewModelStore.find { it.code == flViewModelId.code } ?: return null.also {
+                FLLogger.log("Returning null because could not find viewmodel id")
+            }
+        val viewModel = getAllViewModels().find { it.hashCode() == viewModelId.code }
+        if(viewModel == null){
+            FLLogger.log("Returning null because could not find viewmodel based on id")
+            return null
+        }
         return propertyParser.parseProperties(viewModel)
     }
 
-    fun addPropertyInterceptor(interceptor: FLPropertyParserInterceptor) {
-        propertyInterceptors.add(interceptor)
+    override fun serializeFieldOfViewModel(referencePath: FLReferencePath): FLProperty? {
+        val allViewModelStore = getAllViewModelsIds()
+        val viewModelId =
+            allViewModelStore.find { it.code == referencePath[0] } ?: return null
+        val viewModel = getAllViewModels().find { it.hashCode() == viewModelId.code }
+        if(viewModel == null){
+            return null
+        }
+        return propertyParser.serializeFieldOfViewModel(viewModel,referencePath)
     }
 
 
-    fun init(application: Application) {
+    fun setActivityLifecycleListener(listener: FLCurrentActivityListener){
+        this.listener = listener
+    }
+
+    fun init(application: Application,config : FLConfig) {
         this.application = application
+        this.propertyInterceptors = config.interceptors
+        this.propertyParser = FLPropertyParserImpl()
         application.registerActivityLifecycleCallbacks(activityLifecycleCallback)
         startApiServer(application)
     }
@@ -51,54 +76,70 @@ object FragLens : FragLensApi {
     }
 
 
-    internal fun onStartedActivity(activity: androidx.activity.ComponentActivity) {
+    internal fun onResumedActivity(activity: androidx.activity.ComponentActivity) {
         val viewModels = getAllViewModels(activity)
         activityStore[activity] = viewModels
+        listener?.onResumed(activity)
         updateFlow()
     }
 
-    internal fun onStopActivity(activity: androidx.activity.ComponentActivity) {
+    internal fun onPausedActivity(activity: androidx.activity.ComponentActivity) {
+        listener?.onPaused(activity)
+    }
+
+    internal fun onDestroyActivity(activity: androidx.activity.ComponentActivity) {
         activityStore.remove(activity)
         updateFlow()
     }
 
-    internal fun onStartedFragment(fragment: Fragment) {
+    internal fun onResumedFragment(fragment: Fragment) {
         val viewModels = getAllViewModels(fragment)
-        fragmentStore[fragment] = viewModels
+        val navGraphBasedViewModels = getNavGraphViewModelStoreOwner(fragment)?.run { getAllViewModels(this) } ?: emptyList()
+        fragmentStore[fragment] = viewModels.toMutableList()+navGraphBasedViewModels
         updateFlow()
     }
 
-    internal fun onStopFragment(fragment: Fragment) {
+    internal fun onDestroyFragment(fragment: Fragment) {
         fragmentStore.remove(fragment)
         updateFlow()
     }
 
     private fun updateFlow() {
-        _viewModelFlow.value =
-            getAllViewModels().map { FLViewModelId(it.hashCode(), it::class.java.simpleName) }
+        _viewModelFlow.value = getAllViewModelsIds()
     }
 
-    private fun getAllViewModels(): List<ViewModel> {
-        val viewModels = mutableListOf<ViewModel>()
-        activityStore.values.forEach {
-            viewModels.addAll(it as Collection<ViewModel>)
+    private fun getAllViewModels() : List<ViewModel> {
+        return (activityStore.values + fragmentStore.values).flatten() as List<ViewModel>
+    }
+
+    private fun getAllViewModelsIds(): List<FLViewModelId> {
+        val viewModels = mutableListOf<FLViewModelId>()
+        activityStore.forEach { entry ->
+            val viewModelList = (entry.value as Collection<ViewModel>).map {
+                FLViewModelId(it.hashCode(),
+                    it.javaClass.simpleName,entry.key.javaClass.simpleName,entry.key.hashCode(),
+                    FLViewModelOwnerType.Activity.name)
+            }
+            viewModels.addAll(viewModelList)
         }
-        fragmentStore.values.forEach {
-            viewModels.addAll(it as Collection<ViewModel>)
+        fragmentStore.forEach { entry ->
+            val viewModelList = (entry.value as Collection<ViewModel>).map {
+                FLViewModelId(it.hashCode(),
+                    it.javaClass.simpleName,entry.key.javaClass.simpleName,entry.key.hashCode(),
+                    FLViewModelOwnerType.Fragment.name)
+            }
+            viewModels.addAll(viewModelList)
         }
         return viewModels
     }
 
     internal fun getAllViewModels(owner: ViewModelStoreOwner): List<ViewModel> {
         return try {
-
             val storeField = ViewModelStoreOwner::class.java.getDeclaredMethod("getViewModelStore")
             val store = storeField.invoke(owner) as ViewModelStore
-
             val mapField = ViewModelStore::class.java.getDeclaredField("map")
             mapField.isAccessible = true
             val mMap = mapField.get(store) as Map<String, ViewModel>
-
             mMap.values.toList()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -113,7 +154,7 @@ object FragLens : FragLensApi {
             .addRequestHandler(object : GetRequestHandler<Any>() {
 
                 override fun onGetRequest(uri: String): Any {
-                    return viewModelIdFlow.value
+                    return viewModelIdFlow.value.sortedBy { it.name }
                 }
 
                 override fun getMethodName(): String {
@@ -129,13 +170,42 @@ object FragLens : FragLensApi {
                 override fun onRequest(requestBody: FLViewModelId): Any {
                     val props = parseProperties(requestBody)
                     if (props != null) {
-                        return FLParserApiResponse(isSuccess = true, items = props.properties)
+                        return FLParserApiResponse(isSuccess = true, items = props.properties.sortedBy { it.name }, viewmodelName = props.name)
                     }
-                    return FLParserApiResponse(isSuccess = false)
+                    return FLParserApiResponse(isSuccess = false, items = emptyList(), viewmodelName = requestBody.name)
+                }
+
+            }).addRequestHandler(object :
+                PostRequestHandler<FLReferencePath, Any>(FLReferencePath::class) {
+                override fun getMethodName(): String {
+                    return "getdetailsfromprop"
+                }
+
+                override fun onRequest(requestBody: FLReferencePath): Any {
+                    val result = serializeFieldOfViewModel(requestBody)
+                    return FLSerializeFieldResponse(isSuccess = result != null,result)
                 }
 
             }).startWebApp(false).build()
         server?.start()
+    }
+
+
+    fun getNavGraphViewModelStoreOwner(fragment: Fragment): ViewModelStoreOwner? {
+        return try {
+            val navController = NavHostFragment.findNavController(fragment)
+
+            // Find the nearest NavGraph parent of this destination
+            val destination = navController.currentBackStackEntry?.destination
+            val parentGraph = generateSequence(destination) { it.parent }
+                .firstOrNull { it is NavGraph } as? NavGraph
+
+            // If found, return its ViewModelStoreOwner
+            parentGraph?.let { navController.getViewModelStoreOwner(it.id) }
+        } catch (e: Exception) {
+            FLLogger.log("No navgraph ViewModelStoreOwner for ${fragment::class.java.simpleName}: ${e.message}")
+            null
+        }
     }
 
 }

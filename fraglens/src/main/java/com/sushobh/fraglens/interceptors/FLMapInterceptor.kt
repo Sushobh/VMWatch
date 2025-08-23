@@ -1,0 +1,34 @@
+package com.sushobh.fraglens.interceptors
+
+import com.sushobh.fraglens.FLProperty
+import com.sushobh.fraglens.FLReferencePath
+import com.sushobh.fraglens.serializers.FLMapSerializer
+import java.lang.reflect.Field
+
+class FLMapInterceptor(private val mapSerializer: FLMapSerializer) :  FLBasePropertyParserInterceptor() {
+    override fun intercept(
+        owner: Any,
+        field: Field,
+        fullFieldValue: Boolean
+    ): FLProperty? {
+        field.isAccessible = true
+        val value = field.get(owner) ?: return null
+        val type = field.type
+
+        val (short,long) = if(fullFieldValue){
+            mapSerializer.parseFullDisplayable(value)
+        }
+        else {
+            mapSerializer.parseShortDisplayable(value)
+        }
+
+        return FLProperty(
+            name = field.name,
+            type = type.name,
+            value = short,
+            isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
+            fieldValue = long,
+            refPath = FLReferencePath(owner.hashCode(), value.hashCode())
+        )
+    }
+}
