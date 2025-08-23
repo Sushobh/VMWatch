@@ -1,15 +1,30 @@
 package com.sushobh.fraglens
 
+import com.sushobh.fraglens.serializers.FLDataClassSerialzer
+import com.sushobh.fraglens.serializers.FLIterableSerializer
+import com.sushobh.fraglens.serializers.FLMapSerializer
+import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import java.lang.reflect.Field
 import kotlin.reflect.full.memberFunctions
 
-class FLFieldTypeChecker {
+class FLFieldTypeChecker(private val flDataClassSerialzer: FLDataClassSerialzer,
+                         private val flPrimitveSerialzer: FLPrimitveSerialzer, private val flMapSerializer: FLMapSerializer,
+                         val flIterableSerializer: FLIterableSerializer
+) {
 
-    fun checkType(owner: Any, field: Field) : FLFieldType {
-        field.isAccessible = true
-        val value = field.get(owner)
+    fun getSerializerForType(value: Any) : FLPropertySerialzer? {
+        return when(checkType(value)){
+            FLFieldType.DataClass -> flDataClassSerialzer
+            FLFieldType.Iterable -> flIterableSerializer
+            FLFieldType.Map -> flMapSerializer
+            FLFieldType.Primitive -> flPrimitveSerialzer
+            else -> null
+        }
+    }
+
+    fun checkType(value : Any) : FLFieldType{
         val kClass = value::class
-        val type = field.type
+        val type = value::class.java
         if(kClass.java.isPrimitive ||
             value is String ||
             value is Number ||
@@ -35,6 +50,13 @@ class FLFieldTypeChecker {
         else {
             return FLFieldType.Unknown
         }
+    }
+
+
+    fun checkType(owner: Any, field: Field) : FLFieldType {
+        field.isAccessible = true
+        val value = field.get(owner)
+        return checkType(value)
     }
 
 }

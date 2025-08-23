@@ -1,5 +1,7 @@
 package com.sushobh.fraglens.interceptors
 
+import com.sushobh.fraglens.FLFieldType
+import com.sushobh.fraglens.FLFieldTypeChecker
 import com.sushobh.fraglens.FLProperty
 import com.sushobh.fraglens.FLReferencePath
 import com.sushobh.fraglens.serializers.FLDataClassSerialzer
@@ -7,8 +9,7 @@ import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import java.lang.reflect.Field
 
 internal class FLLiveDataInterceptor(
-    private val flDataClassSerialzer: FLDataClassSerialzer,
-    private val flPrimitveSerializer: FLPrimitveSerialzer
+    private val fieldTypeChecker : FLFieldTypeChecker
 ) : FLBasePropertyParserInterceptor() {
     override fun intercept(
         owner: Any,
@@ -32,44 +33,27 @@ internal class FLLiveDataInterceptor(
             null
         }
 
-        if (liveDataValue != null) {
-            val kClass = liveDataValue::class
-            if (kClass.java.isPrimitive ||
-                liveDataValue is String ||
-                liveDataValue is Number ||
-                liveDataValue is Boolean
-            ) {
-                val (short, long) = if (fullFieldValue) {
-                    flPrimitveSerializer.parseFullDisplayable(liveDataValue)
-                } else {
-                    flPrimitveSerializer.parseShortDisplayable(liveDataValue)
-                }
-                return FLProperty(
-                    name = field.name,
-                    type = type.name,
-                    value = short,
-                    isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
-                    fieldValue = long,
-                    refPath = FLReferencePath(owner.hashCode(), value.hashCode())
-                )
-            } else if (kClass.isData) {
-                val (short, long) = if (fullFieldValue) {
-                    flDataClassSerialzer.parseFullDisplayable(liveDataValue)
-                } else {
-                    flDataClassSerialzer.parseShortDisplayable(liveDataValue)
-                }
-                return FLProperty(
-                    name = field.name,
-                    type = type.name,
-                    value = short,
-                    isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
-                    fieldValue = long,
-                    refPath = FLReferencePath(owner.hashCode(), value.hashCode())
-                )
-            }
+        if(liveDataValue == null){
+            return null
         }
 
-        return null
+        val serializer = fieldTypeChecker.getSerializerForType(liveDataValue)
+        if(serializer == null){
+            return null
+        }
+        val (short, long) = if (fullFieldValue) {
+            serializer.parseFullDisplayable(liveDataValue)
+        } else {
+            serializer.parseShortDisplayable(liveDataValue)
+        }
+        return FLProperty(
+            name = field.name,
+            type = type.name,
+            value = short,
+            isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
+            fieldValue = long,
+            refPath = FLReferencePath(owner.hashCode(), value.hashCode())
+        )
     }
 
 }

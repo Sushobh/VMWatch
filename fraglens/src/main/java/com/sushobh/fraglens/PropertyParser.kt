@@ -16,15 +16,16 @@ import java.lang.reflect.Field
 
 internal class FLPropertyParserImpl : FLPropertyParser{
 
-    private val flFieldTypeChecker = FLFieldTypeChecker()
     private val mapSerialzer = FLMapSerializer()
     private val flPrimitveSerialzer = FLPrimitveSerialzer()
     private val flDataClassSerialzer = FLDataClassSerialzer()
     private val flIterableSerializer = FLIterableSerializer()
+
+    private val flFieldTypeChecker = FLFieldTypeChecker(flDataClassSerialzer,flPrimitveSerialzer,mapSerialzer,flIterableSerializer)
     private val primitiveInterceptor = FLPrimitveInterceptor(flPrimitveSerialzer)
     private val dataClassInterceptor = FLDataclassInterceptor(flDataClassSerialzer)
-    private val liveDataInterceptor = FLLiveDataInterceptor(flDataClassSerialzer,flPrimitveSerialzer)
-    private val stateFlowInterceptor = FLStateFlowInterceptor(flDataClassSerialzer,flPrimitveSerialzer)
+    private val liveDataInterceptor = FLLiveDataInterceptor(flFieldTypeChecker)
+    private val stateFlowInterceptor = FLStateFlowInterceptor(flFieldTypeChecker)
     private val iterableInterceptor = FLIterableInterceptor(flIterableSerializer)
     private val mapInterceptor = FLMapInterceptor(mapSerialzer)
     private val interceptors = FragLens.propertyInterceptors.toMutableList()

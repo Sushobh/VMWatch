@@ -41,7 +41,9 @@ class TestViewModel : BaseViewModel() {
 
     data class Hobby(val name : String)
     data class Skill(val name : String)
-
+    private val hobbiesFlow = MutableStateFlow(
+        hobbiesOfCat
+    )
     private val personFlow = MutableStateFlow(
         Person("John Doe", 30, true)
     )
