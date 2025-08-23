@@ -5,9 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.sushobh.fraglens.TestViewModel.Person
 import kotlinx.coroutines.flow.MutableStateFlow
-
-
-
+import kotlinx.coroutines.flow.StateFlow
 
 
 open class BaseViewModel : ViewModel() {
@@ -26,6 +24,9 @@ class TestViewModel : BaseViewModel() {
 
     data class ActivityHolder(val activity : ComponentActivity? = null)
 
+    var nullablePerson : Person? = null
+    var nullablePersonFlow : StateFlow<Person?>? = null
+    var nullablePersonInFlow : StateFlow<Person?> = MutableStateFlow(null)
     data class Person(
         val name: String,
         val age: Int,

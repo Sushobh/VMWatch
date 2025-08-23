@@ -20,7 +20,7 @@ internal class FLDataclassInterceptor(private val flDataclassSerializer: FLDataC
         val type = field.type
 
         if (value == null) {
-            return null
+             return FLProperty.forNull(field,owner)
         }
         val (short,long) = if(fullFieldValue){
             flDataclassSerializer.parseFullDisplayable(value)

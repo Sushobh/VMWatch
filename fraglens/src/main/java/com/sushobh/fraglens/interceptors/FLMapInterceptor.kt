@@ -12,8 +12,10 @@ class FLMapInterceptor(private val mapSerializer: FLMapSerializer) :  FLBaseProp
         fullFieldValue: Boolean
     ): FLProperty? {
         field.isAccessible = true
-        val value = field.get(owner) ?: return null
+
         val type = field.type
+
+        val value = field.get(owner) ?:  return FLProperty.forNull(field,owner)
 
         val (short,long) = if(fullFieldValue){
             mapSerializer.parseFullDisplayable(value)

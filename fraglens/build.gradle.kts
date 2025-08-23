@@ -57,7 +57,7 @@ mavenPublishing {
 }
 
 mavenPublishing {
-    coordinates("com.sushobh", "fraglens", "0.1.6")
+    coordinates("com.sushobh", "fraglens", "0.1.7")
 
     pom {
         name.set("Frag Lens")

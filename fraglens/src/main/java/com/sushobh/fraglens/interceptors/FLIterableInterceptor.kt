@@ -14,9 +14,9 @@ internal class FLIterableInterceptor(
 
     override fun intercept(owner: Any, field: Field, fullFieldValue: Boolean): FLProperty? {
         field.isAccessible = true
-        val value = field.get(owner) ?: return null
-        val type = field.type
 
+        val type = field.type
+        val value = field.get(owner) ?:  return FLProperty.forNull(field,owner)
         val (short,long) = if(fullFieldValue){
             flIterableSerializer.parseFullDisplayable(value)
         }

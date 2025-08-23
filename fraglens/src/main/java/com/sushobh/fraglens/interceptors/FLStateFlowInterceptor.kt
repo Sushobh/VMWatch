@@ -25,7 +25,7 @@ internal class FLStateFlowInterceptor(
         }
 
         val stateFlowValue = try {
-            val getValueMethod = value?.javaClass?.getMethod("getValue")
+            val getValueMethod = value.javaClass?.getMethod("getValue")
             getValueMethod?.isAccessible = true
             getValueMethod?.invoke(value)
         } catch (e: Exception) {
@@ -53,6 +53,6 @@ internal class FLStateFlowInterceptor(
         }
 
 
-        return null
+        return FLProperty.forNull(field,owner)
     }
 }

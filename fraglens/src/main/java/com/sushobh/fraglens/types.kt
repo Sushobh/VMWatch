@@ -15,6 +15,19 @@ data class FLProperty(
     override fun toString(): String {
         return "Property(name='$name', type='$type', value=$value, isMutable=$isMutable)"
     }
+
+    companion object {
+        fun forNull(field : Field,owner : Any) : FLProperty {
+            return FLProperty(
+                name = field.name,
+                type = field.type.name,
+                value = "null",
+                isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
+                fieldValue = "null",
+                refPath = FLReferencePath(owner.hashCode(),-1)
+            )
+        }
+    }
 }
 
 data class FLPropertyOwner(
