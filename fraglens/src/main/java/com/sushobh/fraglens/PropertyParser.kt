@@ -4,16 +4,20 @@ import androidx.lifecycle.MutableLiveData
 import com.sushobh.fraglens.interceptors.FLDataclassInterceptor
 import com.sushobh.fraglens.interceptors.FLIterableInterceptor
 import com.sushobh.fraglens.interceptors.FLLiveDataInterceptor
+import com.sushobh.fraglens.interceptors.FLMapInterceptor
 import com.sushobh.fraglens.interceptors.FLPrimitveInterceptor
 import com.sushobh.fraglens.interceptors.FLStateFlowInterceptor
 import com.sushobh.fraglens.serializers.FLDataClassSerialzer
 import com.sushobh.fraglens.serializers.FLIterableSerializer
+import com.sushobh.fraglens.serializers.FLMapSerializer
 import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.lang.reflect.Field
 
 internal class FLPropertyParserImpl : FLPropertyParser{
 
+    private val flFieldTypeChecker = FLFieldTypeChecker()
+    private val mapSerialzer = FLMapSerializer()
     private val flPrimitveSerialzer = FLPrimitveSerialzer()
     private val flDataClassSerialzer = FLDataClassSerialzer()
     private val flIterableSerializer = FLIterableSerializer()
@@ -22,13 +26,8 @@ internal class FLPropertyParserImpl : FLPropertyParser{
     private val liveDataInterceptor = FLLiveDataInterceptor(flDataClassSerialzer,flPrimitveSerialzer)
     private val stateFlowInterceptor = FLStateFlowInterceptor(flDataClassSerialzer,flPrimitveSerialzer)
     private val iterableInterceptor = FLIterableInterceptor(flIterableSerializer)
-    private val interceptors = FragLens.propertyInterceptors.toMutableList().apply {
-        add(stateFlowInterceptor)
-        add(liveDataInterceptor)
-        add(primitiveInterceptor)
-        add(dataClassInterceptor)
-        add(iterableInterceptor)
-    }
+    private val mapInterceptor = FLMapInterceptor(mapSerialzer)
+    private val interceptors = FragLens.propertyInterceptors.toMutableList()
 
     fun getDeclaredFieldsUpToLevel2(clazz: Class<*>): List<Field> {
         val fields = mutableListOf<Field>()
@@ -72,7 +71,15 @@ internal class FLPropertyParserImpl : FLPropertyParser{
                 return parsedProperty
             }
         }
-        return null
+        return when(flFieldTypeChecker.checkType(owner,field)){
+            FLFieldType.DataClass -> dataClassInterceptor.intercept(owner,field,fullFieldValue)
+            FLFieldType.Iterable -> iterableInterceptor.intercept(owner,field,fullFieldValue)
+            FLFieldType.LiveData -> liveDataInterceptor.intercept(owner,field,fullFieldValue)
+            FLFieldType.Map -> mapInterceptor.intercept(owner,field,fullFieldValue)
+            FLFieldType.Primitive -> primitiveInterceptor.intercept(owner,field,fullFieldValue)
+            FLFieldType.StateFlow -> stateFlowInterceptor.intercept(owner,field,fullFieldValue)
+            FLFieldType.Unknown ->  return null
+        }
     }
 
     override fun refresh(propertyOwner: FLPropertyOwner): FLPropertyOwner {

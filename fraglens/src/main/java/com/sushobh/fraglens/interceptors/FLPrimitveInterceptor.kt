@@ -22,28 +22,20 @@ internal class FLPrimitveInterceptor(private val primtiveSerialzer: FLPrimitveSe
         if(value == null){
             return null
         }
-
-        val kClass = value::class
-        if (kClass.java.isPrimitive ||
-            value is String ||
-            value is Number ||
-            value is Boolean
-        ) {
-            val (short,long) = if(fullFieldValue){
-                primtiveSerialzer.parseFullDisplayable(value)
-            }
-            else {
-                primtiveSerialzer.parseShortDisplayable(value)
-            }
-            return FLProperty(
-                name = field.name,
-                type = type.name,
-                value = short,
-                isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
-                fieldValue = long,
-                refPath = FLReferencePath(owner.hashCode(),value.hashCode())
-            )
+        val (short,long) = if(fullFieldValue){
+            primtiveSerialzer.parseFullDisplayable(value)
         }
+        else {
+            primtiveSerialzer.parseShortDisplayable(value)
+        }
+        return FLProperty(
+            name = field.name,
+            type = type.name,
+            value = short,
+            isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
+            fieldValue = long,
+            refPath = FLReferencePath(owner.hashCode(),value.hashCode())
+        )
         return null
     }
 

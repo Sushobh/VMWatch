@@ -1,11 +1,13 @@
 package com.sushobh.fraglens.interceptors
 
+import com.sushobh.fraglens.FLFieldType
+import com.sushobh.fraglens.FLFieldTypeChecker
 import com.sushobh.fraglens.FLProperty
 import com.sushobh.fraglens.FLReferencePath
 import com.sushobh.fraglens.serializers.FLDataClassSerialzer
 import java.lang.reflect.Field
 
-internal class FLDataclassInterceptor(private val flDataclassInterceptor: FLDataClassSerialzer) : FLBasePropertyParserInterceptor() {
+internal class FLDataclassInterceptor(private val flDataclassSerializer: FLDataClassSerialzer) : FLBasePropertyParserInterceptor() {
     override fun intercept(
         owner: Any,
         field: Field,
@@ -20,25 +22,20 @@ internal class FLDataclassInterceptor(private val flDataclassInterceptor: FLData
         if (value == null) {
             return null
         }
-
-        val kClass = value::class
-        if (kClass.isData) {
-            val (short,long) = if(fullFieldValue){
-                flDataclassInterceptor.parseFullDisplayable(value)
-            }
-            else {
-                flDataclassInterceptor.parseShortDisplayable(value)
-            }
-            return FLProperty(
-                name = field.name,
-                type = type.name,
-                value = short,
-                isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
-                fieldValue = long,
-                refPath = FLReferencePath(owner.hashCode(),value.hashCode())
-            )
+        val (short,long) = if(fullFieldValue){
+            flDataclassSerializer.parseFullDisplayable(value)
         }
-        return null
+        else {
+            flDataclassSerializer.parseShortDisplayable(value)
+        }
+        return FLProperty(
+            name = field.name,
+            type = type.name,
+            value = short,
+            isMutable = !java.lang.reflect.Modifier.isFinal(field.modifiers),
+            fieldValue = long,
+            refPath = FLReferencePath(owner.hashCode(),value.hashCode())
+        )
     }
 
 

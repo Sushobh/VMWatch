@@ -40,6 +40,7 @@ interface FLPropertyParserInterceptor {
     fun intercept(owner : Any,field : Field,fullFieldValue : Boolean) : FLProperty?
 }
 
+
 interface FragLensApi {
     val viewModelIdFlow : StateFlow<List<FLViewModelId>>
     fun parseProperties(flViewModelId: FLViewModelId) : FLPropertyOwner?
@@ -80,4 +81,15 @@ data class FLReferencePath(val viewModelCode : Int,val fieldCode : Int) {
 interface FLCurrentActivityListener {
     fun onResumed(activity : androidx.activity.ComponentActivity)
     fun onPaused(activity : androidx.activity.ComponentActivity)
+}
+
+
+sealed interface FLFieldType {
+    data object StateFlow : FLFieldType
+    data object DataClass : FLFieldType
+    data object Iterable : FLFieldType
+    data object Map : FLFieldType
+    data object LiveData : FLFieldType
+    data object Primitive : FLFieldType
+    data object Unknown : FLFieldType
 }

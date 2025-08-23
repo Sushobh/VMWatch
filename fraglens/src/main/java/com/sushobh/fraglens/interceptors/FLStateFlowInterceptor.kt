@@ -19,15 +19,6 @@ internal class FLStateFlowInterceptor(
         val value = field.get(owner)
         val type = field.type
 
-        val isStateFlow = try {
-            val stateFlowClass = Class.forName("kotlinx.coroutines.flow.StateFlow")
-            stateFlowClass.isAssignableFrom(type)
-        } catch (e: Exception) {
-            false
-        }
-        if (!isStateFlow) {
-            return null
-        }
         val stateFlowValue = try {
             val getValueMethod = value?.javaClass?.getMethod("getValue")
             getValueMethod?.isAccessible = true
