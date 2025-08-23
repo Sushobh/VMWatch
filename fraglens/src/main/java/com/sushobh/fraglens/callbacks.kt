@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 
 internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
@@ -41,7 +42,7 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
     }
 
     private fun addFragmentCallback(p0: Activity) {
-        if (p0 is AppCompatActivity) {
+        if (p0 is FragmentActivity) {
             p0.supportFragmentManager.registerFragmentLifecycleCallbacks(
                 FragmentLifeCycleCallback,
                 true
@@ -50,7 +51,7 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
     }
 
     private fun removeFragmentCallback(p0: Activity) {
-        if (p0 is AppCompatActivity) {
+        if (p0 is FragmentActivity) {
             p0.supportFragmentManager.unregisterFragmentLifecycleCallbacks(FragmentLifeCycleCallback)
         }
     }

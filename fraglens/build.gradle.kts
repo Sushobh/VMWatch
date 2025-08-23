@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.vanniktech.maven.publish")
 }
-
+val nav_version = "2.9.3"
 android {
     namespace = "com.sushobh.fraglens"
     compileSdk = 35
@@ -46,6 +46,8 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation("com.sushobh:androidrestserver:1.0.0")
     implementation(libs.gson.v2131)
+    implementation("androidx.navigation:navigation-fragment:${nav_version}")
+    implementation("androidx.navigation:navigation-ui:${nav_version}")
 }
 
 

@@ -1,13 +1,13 @@
 package com.sushobh.fraglens
-
-import android.content.Intent
+import com.sushobh.fraglens.main.R
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     val vm : TestViewModel by viewModels()
 
@@ -15,5 +15,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         vm.toString()
+        setContentView(R.layout.activity_main)
     }
 }

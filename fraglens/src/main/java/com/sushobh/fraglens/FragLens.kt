@@ -7,11 +7,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.navigation.NavGraph
+import androidx.navigation.Navigation
 import com.ranrings.libs.androidapptorest.AndroidRestServer
 import com.ranrings.libs.androidapptorest.Base.GetRequestHandler
 import com.ranrings.libs.androidapptorest.Base.PostRequestHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 
 object FragLens : FragLensApi {
     internal var propertyInterceptors : List<FLPropertyParserInterceptor> = arrayListOf()
@@ -87,7 +91,8 @@ object FragLens : FragLensApi {
 
     internal fun onResumedFragment(fragment: Fragment) {
         val viewModels = getAllViewModels(fragment)
-        fragmentStore[fragment] = viewModels
+        val navGraphBasedViewModels = getNavGraphViewModelStoreOwner(fragment)?.run { getAllViewModels(this) } ?: emptyList()
+        fragmentStore[fragment] = viewModels.toMutableList()+navGraphBasedViewModels
         updateFlow()
     }
 
@@ -127,14 +132,11 @@ object FragLens : FragLensApi {
 
     internal fun getAllViewModels(owner: ViewModelStoreOwner): List<ViewModel> {
         return try {
-
             val storeField = ViewModelStoreOwner::class.java.getDeclaredMethod("getViewModelStore")
             val store = storeField.invoke(owner) as ViewModelStore
-
             val mapField = ViewModelStore::class.java.getDeclaredField("map")
             mapField.isAccessible = true
             val mMap = mapField.get(store) as Map<String, ViewModel>
-
             mMap.values.toList()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -183,6 +185,24 @@ object FragLens : FragLensApi {
 
             }).startWebApp(false).build()
         server?.start()
+    }
+
+
+    fun getNavGraphViewModelStoreOwner(fragment: Fragment): ViewModelStoreOwner? {
+        return try {
+            val navController = NavHostFragment.findNavController(fragment)
+
+            // Find the nearest NavGraph parent of this destination
+            val destination = navController.currentBackStackEntry?.destination
+            val parentGraph = generateSequence(destination) { it.parent }
+                .firstOrNull { it is NavGraph } as? NavGraph
+
+            // If found, return its ViewModelStoreOwner
+            parentGraph?.let { navController.getViewModelStoreOwner(it.id) }
+        } catch (e: Exception) {
+            FLLogger.log("No navgraph ViewModelStoreOwner for ${fragment::class.java.simpleName}: ${e.message}")
+            null
+        }
     }
 
 }
