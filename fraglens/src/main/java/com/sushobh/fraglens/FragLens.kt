@@ -32,9 +32,12 @@ object FragLens : FragLensApi {
     override fun parseProperties(flViewModelId: FLViewModelId): FLPropertyOwner? {
         val allViewModelStore = getAllViewModelsIds()
         val viewModelId =
-            allViewModelStore.find { it.code == flViewModelId.code } ?: return null
+            allViewModelStore.find { it.code == flViewModelId.code } ?: return null.also {
+                FLLogger.log("Returning null because could not find viewmodel id")
+            }
         val viewModel = getAllViewModels().find { it.hashCode() == viewModelId.code }
         if(viewModel == null){
+            FLLogger.log("Returning null because could not find viewmodel based on id")
             return null
         }
         return propertyParser.parseProperties(viewModel)

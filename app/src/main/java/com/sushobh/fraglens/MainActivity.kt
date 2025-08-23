@@ -3,7 +3,6 @@ import com.sushobh.fraglens.main.R
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 
 
