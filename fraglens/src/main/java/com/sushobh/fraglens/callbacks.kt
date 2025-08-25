@@ -5,7 +5,6 @@ import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
@@ -13,7 +12,9 @@ import androidx.fragment.app.FragmentManager
 internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
 
     override fun onActivityCreated(p0: Activity, p1: Bundle?) {
-        addFragmentCallback(p0)
+        if(p0 is FragmentActivity){
+            addFragmentCallback(p0)
+        }
     }
 
 
@@ -22,11 +23,17 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
     }
 
     override fun onActivityResumed(p0: Activity) {
-        FragLens.onResumedActivity(p0 as ComponentActivity)
+        if(p0 is ComponentActivity){
+            FragLens.onResumedActivity(p0)
+        }
+
     }
 
     override fun onActivityPaused(p0: Activity) {
-        FragLens.onPausedActivity(p0 as ComponentActivity)
+        if(p0 is ComponentActivity){
+            FragLens.onPausedActivity(p0)
+        }
+
     }
 
     override fun onActivityStopped(p0: Activity) {
@@ -37,23 +44,24 @@ internal object activityLifecycleCallback : ActivityLifecycleCallbacks {
     }
 
     override fun onActivityDestroyed(p0: Activity) {
-        removeFragmentCallback(p0)
-        FragLens.onDestroyActivity(p0 as ComponentActivity)
+        if(p0 is FragmentActivity) {
+            removeFragmentCallback(p0)
+        }
+        if(p0 is ComponentActivity){
+            FragLens.onDestroyActivity(p0)
+        }
+
     }
 
-    private fun addFragmentCallback(p0: Activity) {
-        if (p0 is FragmentActivity) {
-            p0.supportFragmentManager.registerFragmentLifecycleCallbacks(
-                FragmentLifeCycleCallback,
-                true
-            )
-        }
+    private fun addFragmentCallback(p0: FragmentActivity) {
+        p0.supportFragmentManager.registerFragmentLifecycleCallbacks(
+            FragmentLifeCycleCallback,
+            true
+        )
     }
 
-    private fun removeFragmentCallback(p0: Activity) {
-        if (p0 is FragmentActivity) {
-            p0.supportFragmentManager.unregisterFragmentLifecycleCallbacks(FragmentLifeCycleCallback)
-        }
+    private fun removeFragmentCallback(p0: FragmentActivity) {
+        p0.supportFragmentManager.unregisterFragmentLifecycleCallbacks(FragmentLifeCycleCallback)
     }
 }
 

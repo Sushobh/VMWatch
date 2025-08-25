@@ -27,14 +27,18 @@ class TestViewModel : BaseViewModel() {
     var nullablePerson : Person? = null
     var nullablePersonFlow : StateFlow<Person?>? = null
     var nullablePersonInFlow : StateFlow<Person?> = MutableStateFlow(null)
+
+    open class Animal(open val age : Int)
     data class Person(
         val name: String,
-        val age: Int,
+        override val age: Int,
         val isEmployed: Boolean,
         val hobbies : List<Hobby> =
             arrayListOf(Hobby("Cricket"),Hobby("Chess")),
         val skills: Array<Skill> = arrayOf(Skill("Programming"),Skill("Writing"))
-    )
+    ) : Animal(age)
+
+
 
     val hobbiesOfCat : List<Hobby> =
         arrayListOf(Hobby("Meowing"),Hobby("Running"))
