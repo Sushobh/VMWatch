@@ -42,7 +42,7 @@ class SafeGson private constructor(
                 // size limit reached — just return whatever has been serialized
                 stringWriter.toString()
             } catch (e: Exception) {
-                "\"<Serialization error: ${e.message}>\""
+                SafeMoshi.toJson(obj)
             }
         }
     }
