@@ -27,6 +27,7 @@ class SafeGson private constructor(
         }
     }
 
+
     private fun serialize(obj: Any?): String {
         return runCatching {
             runWithTimeout(timeoutMs) {
@@ -41,9 +42,15 @@ class SafeGson private constructor(
             runWithTimeout(timeoutMs) {
                 SafeMoshi.toJson(obj)
             }
-        }.recoverCatching { runWithTimeout(timeoutMs) { obj!!.toString() } }.getOrElse {
+        }.
+        recoverCatching {
+            runWithTimeout(timeoutMs) { obj!!.toString() }
+        }.
+        getOrElse {
             "{\"message\" : \"Serialization failed: ${it.message} either because of a timeout or a failure to serialize.\"}"
         }
+
+
     }
 
     private fun runWithTimeout(timeoutMs: Long, block: () -> String): String {
@@ -51,10 +58,6 @@ class SafeGson private constructor(
         return try {
             val future = executor.submit(Callable { block() })
             future.get(timeoutMs, TimeUnit.MILLISECONDS)
-        } catch (e: TimeoutException) {
-            "\"<Serialization timed out>\""
-        } catch (e: Exception) {
-            "\"<Serialization failed: ${e.message}>\""
         } finally {
             executor.shutdownNow()
         }
