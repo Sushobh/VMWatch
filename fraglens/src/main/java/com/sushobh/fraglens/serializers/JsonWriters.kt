@@ -2,7 +2,6 @@ package com.sushobh.fraglens.serializers
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonWriter
-import java.io.IOException
 import java.io.StringWriter
 import java.io.Writer
 import java.util.concurrent.Callable
@@ -21,7 +20,7 @@ class SafeGson private constructor(
             obj: Any?,
             maxDepth: Int = 10,
             maxSize: Int = 10000,
-            timeoutMs: Long = 300
+            timeoutMs: Long = 1000
         ): String {
             val safe = SafeGson(Gson(), maxDepth, maxSize, timeoutMs)
             return safe.serialize(obj)
@@ -29,21 +28,21 @@ class SafeGson private constructor(
     }
 
     private fun serialize(obj: Any?): String {
-        return runWithTimeout(timeoutMs) {
-            val stringWriter = StringWriter()
-            val limitingWriter = SizeLimitingWriter(stringWriter, maxSize)
-            val depthWriter = DepthLimitingJsonWriter(limitingWriter, maxDepth)
-
-            try {
+        return runCatching {
+            runWithTimeout(timeoutMs) {
+                val stringWriter = StringWriter()
+                val limitingWriter = SizeLimitingWriter(stringWriter, maxSize)
+                val depthWriter = DepthLimitingJsonWriter(limitingWriter, maxDepth)
                 gson.toJson(obj, Any::class.java, depthWriter)
                 depthWriter.flush()
                 stringWriter.toString()
-            } catch (e: IOException) {
-                // size limit reached — just return whatever has been serialized
-                stringWriter.toString()
-            } catch (e: Exception) {
+            }
+        }.recoverCatching {
+            runWithTimeout(timeoutMs) {
                 SafeMoshi.toJson(obj)
             }
+        }.recoverCatching { runWithTimeout(timeoutMs) { obj!!.toString() } }.getOrElse {
+            "{\"message\" : \"Serialization failed: ${it.message} either because of a timeout or a failure to serialize.\"}"
         }
     }
 
