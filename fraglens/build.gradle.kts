@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.gson.v2131)
     implementation("androidx.navigation:navigation-fragment:${nav_version}")
     implementation("androidx.navigation:navigation-ui:${nav_version}")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
 }
 
 
@@ -57,7 +58,7 @@ mavenPublishing {
 }
 
 mavenPublishing {
-    coordinates("com.sushobh", "fraglens", "0.1.6")
+    coordinates("com.sushobh", "fraglens", "0.1.12")
 
     pom {
         name.set("Frag Lens")

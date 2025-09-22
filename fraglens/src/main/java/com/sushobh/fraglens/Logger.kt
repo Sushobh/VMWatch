@@ -8,4 +8,8 @@ object FLLogger {
         Log.i("FragLensDebubLogs",message)
     }
 
+    fun error(message: String) {
+        Log.e("FragLensDebubLogs",message)
+    }
+
 }

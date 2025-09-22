@@ -13,14 +13,11 @@ internal class FLPrimitveInterceptor(private val primtiveSerialzer: FLPrimitveSe
     ): FLProperty? {
         field.isAccessible = true
 
-        var fieldValue: String? = null
-        var displayValue: String? = null
-
         val value = field.get(owner)
         val type = field.type
 
         if(value == null){
-            return null
+            return FLProperty.forNull(field,owner)
         }
         val (short,long) = if(fullFieldValue){
             primtiveSerialzer.parseFullDisplayable(value)
@@ -36,7 +33,7 @@ internal class FLPrimitveInterceptor(private val primtiveSerialzer: FLPrimitveSe
             fieldValue = long,
             refPath = FLReferencePath(owner.hashCode(),value.hashCode())
         )
-        return null
+
     }
 
 }

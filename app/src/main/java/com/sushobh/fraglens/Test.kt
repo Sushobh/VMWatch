@@ -5,9 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.sushobh.fraglens.TestViewModel.Person
 import kotlinx.coroutines.flow.MutableStateFlow
-
-
-
+import kotlinx.coroutines.flow.StateFlow
 
 
 open class BaseViewModel : ViewModel() {
@@ -26,14 +24,21 @@ class TestViewModel : BaseViewModel() {
 
     data class ActivityHolder(val activity : ComponentActivity? = null)
 
+    var nullablePerson : Person? = null
+    var nullablePersonFlow : StateFlow<Person?>? = null
+    var nullablePersonInFlow : StateFlow<Person?> = MutableStateFlow(null)
+
+    open class Animal(open val age : Int)
     data class Person(
         val name: String,
-        val age: Int,
+        override val age: Int,
         val isEmployed: Boolean,
         val hobbies : List<Hobby> =
             arrayListOf(Hobby("Cricket"),Hobby("Chess")),
         val skills: Array<Skill> = arrayOf(Skill("Programming"),Skill("Writing"))
-    )
+    ) : Animal(age)
+
+
 
     val hobbiesOfCat : List<Hobby> =
         arrayListOf(Hobby("Meowing"),Hobby("Running"))

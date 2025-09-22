@@ -1,27 +1,27 @@
 package com.sushobh.fraglens
 
-import android.app.Activity
 import android.app.Application
 import android.app.Application.ActivityLifecycleCallbacks
+import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavGraph
-import androidx.navigation.Navigation
 import com.ranrings.libs.androidapptorest.AndroidRestServer
 import com.ranrings.libs.androidapptorest.Base.GetRequestHandler
 import com.ranrings.libs.androidapptorest.Base.PostRequestHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import kotlin.system.measureTimeMillis
+import kotlin.time.measureTimedValue
 
 object FragLens : FragLensApi {
     internal var propertyInterceptors : List<FLPropertyParserInterceptor> = arrayListOf()
     private val port = 56440;
     private var application: Application? = null
-    private val activityStore = HashMap<Activity, List<Any>>()
+    private val activityStore = HashMap<ComponentActivity, List<Any>>()
     private val fragmentStore = HashMap<Fragment, List<Any>>()
     private var server: AndroidRestServer? = null
     private val _viewModelFlow = MutableStateFlow(emptyList<FLViewModelId>())
@@ -67,23 +67,24 @@ object FragLens : FragLensApi {
         startApiServer(application)
     }
 
-    fun stopServer(){
+    fun stop(){
         server?.stop()
+        unRegisterActivityCallback(activityLifecycleCallback)
     }
 
     internal fun unRegisterActivityCallback(callback: ActivityLifecycleCallbacks) {
-        application?.registerActivityLifecycleCallbacks(callback)
+        application?.unregisterActivityLifecycleCallbacks(callback)
     }
 
 
-    internal fun onResumedActivity(activity: androidx.activity.ComponentActivity) {
-        val viewModels = getAllViewModels(activity)
-        activityStore[activity] = viewModels
+    internal fun onResumedActivity(activity: ComponentActivity) {
+        activityStore[activity] = mutableListOf<Any>()
+        updateFlow()
         listener?.onResumed(activity)
         updateFlow()
     }
 
-    internal fun onPausedActivity(activity: androidx.activity.ComponentActivity) {
+    internal fun onPausedActivity(activity: ComponentActivity) {
         listener?.onPaused(activity)
     }
 
@@ -93,9 +94,7 @@ object FragLens : FragLensApi {
     }
 
     internal fun onResumedFragment(fragment: Fragment) {
-        val viewModels = getAllViewModels(fragment)
-        val navGraphBasedViewModels = getNavGraphViewModelStoreOwner(fragment)?.run { getAllViewModels(this) } ?: emptyList()
-        fragmentStore[fragment] = viewModels.toMutableList()+navGraphBasedViewModels
+        fragmentStore[fragment] = mutableListOf<Any>()
         updateFlow()
     }
 
@@ -105,6 +104,15 @@ object FragLens : FragLensApi {
     }
 
     private fun updateFlow() {
+        activityStore.forEach {
+            val viewModels = getAllViewModels(it.key)
+            activityStore[it.key] = viewModels
+        }
+        fragmentStore.forEach {
+            val viewModels = getAllViewModels(it.key)
+            val navGraphBasedViewModels = getNavGraphViewModelStoreOwner(it.key)?.run { getAllViewModels(this) } ?: emptyList()
+            fragmentStore[it.key] = viewModels.toMutableList()+navGraphBasedViewModels
+        }
         _viewModelFlow.value = getAllViewModelsIds()
     }
 
@@ -114,6 +122,7 @@ object FragLens : FragLensApi {
 
     private fun getAllViewModelsIds(): List<FLViewModelId> {
         val viewModels = mutableListOf<FLViewModelId>()
+
         activityStore.forEach { entry ->
             val viewModelList = (entry.value as Collection<ViewModel>).map {
                 FLViewModelId(it.hashCode(),
@@ -154,7 +163,13 @@ object FragLens : FragLensApi {
             .addRequestHandler(object : GetRequestHandler<Any>() {
 
                 override fun onGetRequest(uri: String): Any {
-                    return viewModelIdFlow.value.sortedBy { it.name }
+                    val (resp,time) = measureTimedValue {
+                        updateFlow()
+                        viewModelIdFlow.value.sortedBy { it.name }
+                    }
+
+                    FLLogger.log("getallviewmodels took ${time} millis")
+                    return resp
                 }
 
                 override fun getMethodName(): String {
@@ -168,11 +183,17 @@ object FragLens : FragLensApi {
                 }
 
                 override fun onRequest(requestBody: FLViewModelId): Any {
-                    val props = parseProperties(requestBody)
-                    if (props != null) {
-                        return FLParserApiResponse(isSuccess = true, items = props.properties.sortedBy { it.name }, viewmodelName = props.name)
-                    }
-                    return FLParserApiResponse(isSuccess = false, items = emptyList(), viewmodelName = requestBody.name)
+                    val (response,timeTaken) =  measureTimedValue  {
+                         val props = parseProperties(requestBody)
+                         if (props != null) {
+                              FLParserApiResponse(isSuccess = true, items = props.properties.sortedBy { it.name }, viewmodelName = props.name)
+                         }
+                         else {
+                             FLParserApiResponse(isSuccess = false, items = emptyList(), viewmodelName = requestBody.name)
+                         }
+                     }
+                    FLLogger.log("getdetailsfromprop took ${timeTaken} millis")
+                    return response
                 }
 
             }).addRequestHandler(object :
@@ -182,8 +203,12 @@ object FragLens : FragLensApi {
                 }
 
                 override fun onRequest(requestBody: FLReferencePath): Any {
-                    val result = serializeFieldOfViewModel(requestBody)
-                    return FLSerializeFieldResponse(isSuccess = result != null,result)
+                    val (resp,time) = measureTimedValue {
+                        val result = serializeFieldOfViewModel(requestBody)
+                        FLSerializeFieldResponse(isSuccess = result != null,result)
+                    }
+                    FLLogger.log("getdetailsfromprop took ${time} millis")
+                    return resp
                 }
 
             }).startWebApp(false).build()

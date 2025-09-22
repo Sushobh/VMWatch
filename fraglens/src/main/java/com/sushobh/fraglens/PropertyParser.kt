@@ -1,6 +1,5 @@
 package com.sushobh.fraglens
 
-import androidx.lifecycle.MutableLiveData
 import com.sushobh.fraglens.interceptors.FLDataclassInterceptor
 import com.sushobh.fraglens.interceptors.FLIterableInterceptor
 import com.sushobh.fraglens.interceptors.FLLiveDataInterceptor
@@ -11,7 +10,6 @@ import com.sushobh.fraglens.serializers.FLDataClassSerialzer
 import com.sushobh.fraglens.serializers.FLIterableSerializer
 import com.sushobh.fraglens.serializers.FLMapSerializer
 import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
-import kotlinx.coroutines.flow.MutableStateFlow
 import java.lang.reflect.Field
 
 internal class FLPropertyParserImpl : FLPropertyParser{
@@ -72,7 +70,7 @@ internal class FLPropertyParserImpl : FLPropertyParser{
                 return parsedProperty
             }
         }
-        return when(flFieldTypeChecker.checkType(owner,field)){
+        return when(flFieldTypeChecker.checkTypeBasedOnField(field)){
             FLFieldType.DataClass -> dataClassInterceptor.intercept(owner,field,fullFieldValue)
             FLFieldType.Iterable -> iterableInterceptor.intercept(owner,field,fullFieldValue)
             FLFieldType.LiveData -> liveDataInterceptor.intercept(owner,field,fullFieldValue)

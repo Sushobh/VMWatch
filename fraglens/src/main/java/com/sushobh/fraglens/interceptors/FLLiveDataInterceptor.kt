@@ -20,10 +20,11 @@ internal class FLLiveDataInterceptor(
 
 
         val value = field.get(owner)
-        if (value == null) {
-            return null
-        }
         val type = field.type
+
+        if (value == null) {
+            return FLProperty.forNull(field,owner)
+        }
 
         val liveDataValue = try {
             val getValueMethod = value.javaClass?.getMethod("getValue")

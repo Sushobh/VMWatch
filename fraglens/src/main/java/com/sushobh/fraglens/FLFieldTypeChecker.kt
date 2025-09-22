@@ -5,7 +5,9 @@ import com.sushobh.fraglens.serializers.FLIterableSerializer
 import com.sushobh.fraglens.serializers.FLMapSerializer
 import com.sushobh.fraglens.serializers.FLPrimitveSerialzer
 import java.lang.reflect.Field
+import kotlin.reflect.KClass
 import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.jvm.kotlinProperty
 
 class FLFieldTypeChecker(private val flDataClassSerialzer: FLDataClassSerialzer,
                          private val flPrimitveSerialzer: FLPrimitveSerialzer, private val flMapSerializer: FLMapSerializer,
@@ -13,7 +15,7 @@ class FLFieldTypeChecker(private val flDataClassSerialzer: FLDataClassSerialzer,
 ) {
 
     fun getSerializerForType(value: Any) : FLPropertySerialzer? {
-        return when(checkType(value)){
+        return when(checkTypeBasedOnValue(value)){
             FLFieldType.DataClass -> flDataClassSerialzer
             FLFieldType.Iterable -> flIterableSerializer
             FLFieldType.Map -> flMapSerializer
@@ -22,41 +24,49 @@ class FLFieldTypeChecker(private val flDataClassSerialzer: FLDataClassSerialzer,
         }
     }
 
-    fun checkType(value : Any) : FLFieldType{
-        val kClass = value::class
-        val type = value::class.java
-        if(kClass.java.isPrimitive ||
-            value is String ||
-            value is Number ||
-            value is Boolean){
-            return FLFieldType.Primitive
-        }
-        else if(kClass.isData) {
-            return FLFieldType.DataClass
-        }
-        else if(androidx.lifecycle.LiveData::class.java.isAssignableFrom(type)) {
-            return FLFieldType.LiveData
-        }
-        else if(Class.forName("kotlinx.coroutines.flow.StateFlow").isAssignableFrom(type)){
-            return FLFieldType.StateFlow
-        }
-        else if(Iterable::class.java.isAssignableFrom(type) ||
-            kClass.memberFunctions.any { it.name == "iterator" }){
-            return FLFieldType.Iterable
-        }
-        else if(Map::class.java.isAssignableFrom(type)){
-            return FLFieldType.Map
-        }
-        else {
-            return FLFieldType.Unknown
+    // --- common internal function ---
+    private fun findFieldType(type: Class<*>, kClass: KClass<*>? = null): FLFieldType {
+        val effectiveKClass = kClass ?: type.kotlin
+
+        return when {
+            // primitives & simple types
+            type.isPrimitive ||
+                    type == String::class.java ||
+                    Number::class.java.isAssignableFrom(type) ||
+                    type == java.lang.Boolean::class.java -> FLFieldType.Primitive
+
+            // data classes
+            effectiveKClass.isData -> FLFieldType.DataClass
+
+            // LiveData
+            androidx.lifecycle.LiveData::class.java.isAssignableFrom(type) -> FLFieldType.LiveData
+
+            // StateFlow
+            try {
+                Class.forName("kotlinx.coroutines.flow.StateFlow").isAssignableFrom(type)
+            } catch (_: ClassNotFoundException) {
+                false
+            } -> FLFieldType.StateFlow
+
+            // collections
+            Iterable::class.java.isAssignableFrom(type) ||
+                    effectiveKClass.memberFunctions.any { it.name == "iterator" } -> FLFieldType.Iterable
+
+            Map::class.java.isAssignableFrom(type) -> FLFieldType.Map
+
+            else -> FLFieldType.Unknown
         }
     }
 
+    // --- public API for value ---
+    fun checkTypeBasedOnValue(value: Any): FLFieldType {
+        return findFieldType(value::class.java, value::class)
+    }
 
-    fun checkType(owner: Any, field: Field) : FLFieldType {
-        field.isAccessible = true
-        val value = field.get(owner)
-        return checkType(value)
+    // --- public API for field ---
+    fun checkTypeBasedOnField(field: Field): FLFieldType {
+        val kClass = field.kotlinProperty?.returnType?.classifier as? KClass<*>
+        return findFieldType(field.type, kClass)
     }
 
 }
