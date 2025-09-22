@@ -1,11 +1,11 @@
-name: Build Distribution (macOS)
+name: Build VMWatch Desktop Distribution (macOS)
 
 on:
   workflow_dispatch:   # run manually from Actions tab
 
 jobs:
   build:
-    runs-on: macos-latest 
+    runs-on: macos-latest
 
     steps:
       - name: Checkout repository
@@ -23,18 +23,19 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('vmwatch_desktop/**/*.gradle*', 'vmwatch_desktop/**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
       - name: Make gradlew executable
-        run: chmod +x gradlew
+        run: chmod +x vmwatch_desktop/gradlew
 
       - name: Build distribution
         run: ./gradlew packageDistributionForCurrentOS --no-daemon
+        working-directory: vmwatch_desktop
 
       - name: Upload Compose artifacts
         uses: actions/upload-artifact@v4
         with:
           name: compose-artifacts
-          path: composeApp/build/compose/binaries/**
+          path: vmwatch_desktop/composeApp/build/compose/binaries/**
