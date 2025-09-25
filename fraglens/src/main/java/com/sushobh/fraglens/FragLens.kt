@@ -8,13 +8,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavGraph
+import androidx.navigation.fragment.NavHostFragment
 import com.ranrings.libs.androidapptorest.AndroidRestServer
 import com.ranrings.libs.androidapptorest.Base.GetRequestHandler
 import com.ranrings.libs.androidapptorest.Base.PostRequestHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import androidx.navigation.fragment.NavHostFragment
-import kotlin.system.measureTimeMillis
 import kotlin.time.measureTimedValue
 
 object FragLens : FragLensApi {

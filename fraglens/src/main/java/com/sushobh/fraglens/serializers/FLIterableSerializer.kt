@@ -2,7 +2,6 @@ package com.sushobh.fraglens.serializers
 
 import com.sushobh.fraglens.FLDisplayableValue
 import com.sushobh.fraglens.FLPropertySerialzer
-import com.sushobh.fraglens.serializers.SafeGson
 
 class FLIterableSerializer : FLPropertySerialzer {
 

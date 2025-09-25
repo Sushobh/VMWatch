@@ -2,11 +2,8 @@ package com.sushobh.fraglens.interceptors
 
 import com.sushobh.fraglens.FLProperty
 import com.sushobh.fraglens.FLReferencePath
-import com.sushobh.fraglens.serializers.FLDataClassSerialzer
 import com.sushobh.fraglens.serializers.FLIterableSerializer
 import java.lang.reflect.Field
-import kotlin.reflect.full.memberFunctions
-import kotlin.reflect.jvm.isAccessible
 
 internal class FLIterableInterceptor(
     private val flIterableSerializer: FLIterableSerializer

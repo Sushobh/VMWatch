@@ -59,5 +59,4 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment:${nav_version}")
     implementation("androidx.navigation:navigation-ui:${nav_version}")     // Or the latest version
     implementation(project(":fraglens"))
-    implementation(project(":fraglens-ui"))
 }

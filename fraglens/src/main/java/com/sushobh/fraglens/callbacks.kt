@@ -88,7 +88,6 @@ internal object FragmentLifeCycleCallback : FragmentManager.FragmentLifecycleCal
 
     override fun onFragmentStopped(fm: FragmentManager, f: Fragment) {
         super.onFragmentStopped(fm, f)
-
     }
 
     override fun onFragmentDestroyed(fm: FragmentManager, f: Fragment) {

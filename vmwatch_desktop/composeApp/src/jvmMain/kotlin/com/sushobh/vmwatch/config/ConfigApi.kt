@@ -13,7 +13,7 @@ class ConfigApi {
         data object Mac : FLPlatform
     }
 
-    fun getAppName(): String = "FragLens Desktop"
+    fun getAppName(): String = "VMWatch Desktop"
 
 
     fun getPlatForm(): FLPlatform {

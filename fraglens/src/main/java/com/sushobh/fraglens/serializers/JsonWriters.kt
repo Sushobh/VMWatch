@@ -7,7 +7,6 @@ import java.io.Writer
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 class SafeGson private constructor(
     private val gson: Gson,

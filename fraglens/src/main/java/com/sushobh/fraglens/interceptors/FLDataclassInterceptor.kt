@@ -1,7 +1,5 @@
 package com.sushobh.fraglens.interceptors
 
-import com.sushobh.fraglens.FLFieldType
-import com.sushobh.fraglens.FLFieldTypeChecker
 import com.sushobh.fraglens.FLProperty
 import com.sushobh.fraglens.FLReferencePath
 import com.sushobh.fraglens.serializers.FLDataClassSerialzer
