@@ -25,8 +25,6 @@ class ConfigApi {
         }
     }
 
-    
-    fun allowedPorts() = intArrayOf(56441,56442,56443,56444,56445)
 
     fun getApiHost() = "http://localhost:56441"
 

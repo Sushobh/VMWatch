@@ -5,11 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,12 +25,15 @@ import kotlinx.coroutines.flow.map
 
 @Composable
 fun FLPollingDetailsView(pollingViewModel: PollingViewModel) {
-    val connectionState by pollingViewModel.state.map { it.connectionState }.collectAsState(PollingVMConnectionState.NotConnected)
+    val connectionState by pollingViewModel.state.map { it.connectionState }
+        .collectAsState(PollingVMConnectionState.NotConnected)
     val listState by pollingViewModel.state.map { it.listState }.collectAsState(PollingVMVmListState.Loading)
-    val detailState  by pollingViewModel.state.map { it.detailsState }.collectAsState(
-        PollingVMVmDetailsState.Waiting)
-    val fieldState  by pollingViewModel.state.map { it.fieldState }.collectAsState(
-        PollingVMFieldValueState.Waiting)
+    val detailState by pollingViewModel.state.map { it.detailsState }.collectAsState(
+        PollingVMVmDetailsState.Waiting
+    )
+    val fieldState by pollingViewModel.state.map { it.fieldState }.collectAsState(
+        PollingVMFieldValueState.Waiting
+    )
 
     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -45,10 +44,11 @@ fun FLPollingDetailsView(pollingViewModel: PollingViewModel) {
                         ViewModelList(listState, pollingViewModel)
                     }
                     Box(modifier = Modifier.weight(4f)) {
-                        ViewModelDetails(detailState ,fieldState,pollingViewModel)
+                        ViewModelDetails(detailState, fieldState, pollingViewModel)
                     }
                 }
             }
+
             PollingVMConnectionState.NotConnected -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
@@ -63,7 +63,11 @@ fun FLPollingDetailsView(pollingViewModel: PollingViewModel) {
 }
 
 @Composable
-fun ViewModelDetails(state: PollingVMVmDetailsState, fieldState: PollingVMFieldValueState, viewModel: PollingViewModel) {
+fun ViewModelDetails(
+    state: PollingVMVmDetailsState,
+    fieldState: PollingVMFieldValueState,
+    viewModel: PollingViewModel
+) {
 
     Card(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -77,15 +81,17 @@ fun ViewModelDetails(state: PollingVMVmDetailsState, fieldState: PollingVMFieldV
             contentAlignment = Alignment.Center
         ) {
 
-            when(state) {
-                PollingVMVmDetailsState.Loading  -> {
+            when (state) {
+                PollingVMVmDetailsState.Loading -> {
                     Text("Loading....")
                 }
+
                 is PollingVMVmDetailsState.Error -> {
                     Text(state.message)
                 }
+
                 is PollingVMVmDetailsState.Success -> {
-                    Row(modifier = Modifier.fillMaxSize()){
+                    Row(modifier = Modifier.fillMaxSize()) {
                         LazyColumn(modifier = Modifier.fillMaxHeight().fillMaxWidth(0.65f)) {
                             item {
                                 Text(
@@ -102,15 +108,14 @@ fun ViewModelDetails(state: PollingVMVmDetailsState, fieldState: PollingVMFieldV
                             }
                         }
 
-                        if(fieldState is PollingVMFieldValueState.Success){
-                            val vmName = if(state is PollingVMVmDetailsState.Success){
+                        if (fieldState is PollingVMFieldValueState.Success) {
+                            val vmName = if (state is PollingVMVmDetailsState.Success) {
                                 state.vmDetails.viewmodelName
-                            }
-                            else {
+                            } else {
                                 ""
                             }
                             Column(modifier = Modifier.fillMaxHeight()) {
-                                FLCFieldDetails(fieldState.fieldDetails,vmName,{
+                                FLCFieldDetails(fieldState.fieldDetails, vmName, {
                                     viewModel.dispatch(FLPollingEvent.CloseFieldDetails)
                                 })
                             }
@@ -118,6 +123,7 @@ fun ViewModelDetails(state: PollingVMVmDetailsState, fieldState: PollingVMFieldV
 
                     }
                 }
+
                 else -> {
                     Text("Please select a viewmodel from the list.")
                 }
@@ -125,8 +131,9 @@ fun ViewModelDetails(state: PollingVMVmDetailsState, fieldState: PollingVMFieldV
         }
     }
 }
+
 @Composable
-fun FLCFieldDetails(field: FLProperty, vmName: String,onClick: () -> Unit) {
+fun FLCFieldDetails(field: FLProperty, vmName: String, onClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         // Top-right close button
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -138,7 +145,7 @@ fun FLCFieldDetails(field: FLProperty, vmName: String,onClick: () -> Unit) {
                     .padding(8.dp)
             )
         }
-        Text("${vmName} -> ${field.name}", modifier = Modifier,style = MaterialTheme.typography.headlineLarge)
+        Text("${vmName} -> ${field.name}", modifier = Modifier, style = MaterialTheme.typography.headlineLarge)
         Spacer(Modifier.height(30.dp))
 
         PrettyJsonView(field.fieldValue.orEmpty())
@@ -146,10 +153,10 @@ fun FLCFieldDetails(field: FLProperty, vmName: String,onClick: () -> Unit) {
 }
 
 @Composable
-fun ViewModelList(state: PollingVMVmListState,viewModel: PollingViewModel) {
+fun ViewModelList(state: PollingVMVmListState, viewModel: PollingViewModel) {
 
     val items = viewModel.listItems.collectAsState(emptyList())
-    var toggledOwnerItems : HashSet<String> = remember {
+    var toggledOwnerItems: HashSet<String> = remember {
         hashSetOf()
     }
     Column(
@@ -157,28 +164,30 @@ fun ViewModelList(state: PollingVMVmListState,viewModel: PollingViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        when(state) {
-            PollingVMVmListState.Loading  -> {
+        when (state) {
+            PollingVMVmListState.Loading -> {
                 Text("Loading", modifier = Modifier.padding(16.dp))
             }
+
             is PollingVMVmListState.Error -> {
                 Text(state.message, modifier = Modifier.padding(16.dp), color = MaterialTheme.colorScheme.error)
             }
+
             is PollingVMVmListState.Success ->
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     val listItems = items.value
                     items(listItems, key = { it.code }) { vm ->
-                        when(vm){
+                        when (vm) {
                             is FLCListViewItem.FLCListViewModelOwner -> {
-                                FLCViewModelOwner(vm,toggledOwnerItems.contains(vm.code), {
-                                      if(toggledOwnerItems.contains(vm.code)){
-                                          toggledOwnerItems = toggledOwnerItems.toHashSet().also { it.remove(vm.code) }
-                                      }
-                                      else {
-                                          toggledOwnerItems = toggledOwnerItems.toHashSet().also { it.add(vm.code) }
-                                      }
+                                FLCViewModelOwner(vm, toggledOwnerItems.contains(vm.code), {
+                                    if (toggledOwnerItems.contains(vm.code)) {
+                                        toggledOwnerItems = toggledOwnerItems.toHashSet().also { it.remove(vm.code) }
+                                    } else {
+                                        toggledOwnerItems = toggledOwnerItems.toHashSet().also { it.add(vm.code) }
+                                    }
                                 })
                             }
+
                             is FLCListViewItem.FLCListViewModel -> {
                                 FLCViewModelItem(
                                     name = vm.viewModelId.name,
@@ -197,7 +206,7 @@ fun ViewModelList(state: PollingVMVmListState,viewModel: PollingViewModel) {
 }
 
 @Composable
-fun FLCViewModelOwner(item : FLCListViewItem.FLCListViewModelOwner, isToggledOn : Boolean, onClick: () -> Unit) {
+fun FLCViewModelOwner(item: FLCListViewItem.FLCListViewModelOwner, isToggledOn: Boolean, onClick: () -> Unit) {
     Text(
         text = item.name,
         modifier = Modifier

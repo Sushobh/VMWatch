@@ -1,6 +1,5 @@
 package com.sushobh.vmwatch
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 import java.lang.reflect.Field
@@ -11,9 +10,9 @@ data class FLProperty(
     val type: String,
     val value: String? = null,
     val isMutable: Boolean = false,
-    val fieldValue : String? = null,
-    val isClickToShow : Boolean = false,
-    val refPath : FLReferencePath
+    val fieldValue: String? = null,
+    val isClickToShow: Boolean = false,
+    val refPath: FLReferencePath
 ) {
     override fun toString(): String {
         return "Property(name='$name', type='$type', value=$value, isMutable=$isMutable)"
@@ -32,48 +31,58 @@ data class FLPropertyOwner(
 }
 
 @Serializable
-data class FLSerializeFieldResponse(val isSuccess : Boolean = false,val value : FLProperty? = null)
+data class FLSerializeFieldResponse(val isSuccess: Boolean = false, val value: FLProperty? = null)
 
-data class FLReflectionProperty(private val field : Field,private val owner : Any)
+data class FLReflectionProperty(private val field: Field, private val owner: Any)
 
 
 interface FLPropertyParser {
     fun parseProperties(owner: Any): FLPropertyOwner
-    fun refresh(propertyOwner : FLPropertyOwner) : FLPropertyOwner
+    fun refresh(propertyOwner: FLPropertyOwner): FLPropertyOwner
 }
 
 interface FLPropertyStore {
-    val propertyOwners : MutableMap<String, FLPropertyOwner>
+    val propertyOwners: MutableMap<String, FLPropertyOwner>
 }
 
 interface FLPropertyParserInterceptor {
-    fun intercept(owner : Any,field : Field) : FLProperty?
+    fun intercept(owner: Any, field: Field): FLProperty?
 }
 
 interface FragLensApi {
-    val viewModelIdFlow : StateFlow<List<FLViewModelId>>
-    fun parseProperties(flViewModelId: FLViewModelId) : FLPropertyOwner?
+    val viewModelIdFlow: StateFlow<List<FLViewModelId>>
+    fun parseProperties(flViewModelId: FLViewModelId): FLPropertyOwner?
 }
 
 @Serializable
-data class FLViewModelId(val code : Int,val name : String,val ownerName : String,val ownerCode : Int,val ownerType : String)
+data class FLViewModelId(
+    val code: Int,
+    val name: String,
+    val ownerName: String,
+    val ownerCode: Int,
+    val ownerType: String
+)
 
 @Serializable
-data class FLParserApiResponse(val isSuccess : Boolean = false,val items : List<FLProperty> = emptyList(),val viewmodelName : String)
+data class FLParserApiResponse(
+    val isSuccess: Boolean = false,
+    val items: List<FLProperty> = emptyList(),
+    val viewmodelName: String
+)
 
 @Serializable
-data class FLReferencePath(val viewModelCode : Int,val fieldCode : Int) {
+data class FLReferencePath(val viewModelCode: Int, val fieldCode: Int) {
 
-    operator fun get(index : Int) : Int {
-        if(index == 0) return viewModelCode
-        if(index == 1) return fieldCode
+    operator fun get(index: Int): Int {
+        if (index == 0) return viewModelCode
+        if (index == 1) return fieldCode
         return -1
     }
 }
 
 
-
-sealed class FLCListViewItem(open val code : String) {
-    data class FLCListViewModel(val viewModelId : FLViewModelId, override val code : String) : FLCListViewItem(code)
-    data class FLCListViewModelOwner(val isSelected : Boolean = false, val name : String,override val code : String) : FLCListViewItem(code)
+sealed class FLCListViewItem(open val code: String) {
+    data class FLCListViewModel(val viewModelId: FLViewModelId, override val code: String) : FLCListViewItem(code)
+    data class FLCListViewModelOwner(val isSelected: Boolean = false, val name: String, override val code: String) :
+        FLCListViewItem(code)
 }

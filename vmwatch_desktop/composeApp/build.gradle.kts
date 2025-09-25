@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 val ktor_version = "3.2.3"
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -10,7 +11,7 @@ plugins {
 
 kotlin {
     jvm()
-    
+
     sourceSets {
         commonMain.dependencies {
             implementation(compose.runtime)

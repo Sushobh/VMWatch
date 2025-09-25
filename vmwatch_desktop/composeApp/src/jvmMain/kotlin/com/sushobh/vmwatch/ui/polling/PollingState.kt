@@ -6,8 +6,8 @@ import com.sushobh.vmwatch.FLViewModelId
 
 sealed class PollingVMVmListState {
     data object Loading : PollingVMVmListState()
-    data class  Success(val vmList: List<FLViewModelId>,val selectedId : FLViewModelId? = null) : PollingVMVmListState()
-    data class  Error(val message: String) : PollingVMVmListState()
+    data class Success(val vmList: List<FLViewModelId>, val selectedId: FLViewModelId? = null) : PollingVMVmListState()
+    data class Error(val message: String) : PollingVMVmListState()
 }
 
 sealed interface PollingVMConnectionState {
@@ -30,4 +30,8 @@ sealed class PollingVMFieldValueState {
 }
 
 
-data class PollingVMMainState(val listState : PollingVMVmListState,val detailsState : PollingVMVmDetailsState,val fieldState : PollingVMFieldValueState)
+data class PollingVMMainState(
+    val listState: PollingVMVmListState,
+    val detailsState: PollingVMVmDetailsState,
+    val fieldState: PollingVMFieldValueState
+)

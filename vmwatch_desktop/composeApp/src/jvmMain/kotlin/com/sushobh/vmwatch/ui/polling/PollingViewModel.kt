@@ -74,7 +74,7 @@ class PollingViewModel(
             )
 
             is FLPollingEvent.VmDetailsFetched -> {
-                state.copy(detailsState = PollingVMVmDetailsState.Success(event.response),)
+                state.copy(detailsState = PollingVMVmDetailsState.Success(event.response))
             }
 
             is FLPollingEvent.VmDetailsFetchFailed -> state.copy(
@@ -95,10 +95,12 @@ class PollingViewModel(
             )
 
             is FLPollingEvent.ViewModelClicked -> {
-                if(state.listState is PollingVMVmListState.Success){
-                    state.copy(fieldState = PollingVMFieldValueState.Waiting, listState = state.listState.copy(selectedId = event.viewModelId))
-                }
-                else {
+                if (state.listState is PollingVMVmListState.Success) {
+                    state.copy(
+                        fieldState = PollingVMFieldValueState.Waiting,
+                        listState = state.listState.copy(selectedId = event.viewModelId)
+                    )
+                } else {
                     state.copy(fieldState = PollingVMFieldValueState.Waiting)
                 }
 

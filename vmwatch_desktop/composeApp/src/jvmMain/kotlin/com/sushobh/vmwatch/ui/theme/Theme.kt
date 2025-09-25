@@ -6,7 +6,6 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 
-
 // Ocean Theme
 private val DeepBlue = Color(0xFF000080)
 private val SeaBlue = Color(0xFF006994)
@@ -337,7 +336,6 @@ private val AmethystColorScheme = darkColorScheme(
     onTertiaryContainer = Color(0xFFFFD6FA),
     surfaceVariant = Color(0xFF4D4450),
 )
-
 
 
 enum class AppTheme(val displayName: String, val colorScheme: ColorScheme) {
