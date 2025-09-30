@@ -43,8 +43,7 @@ VMWatch has two components.
 
 ### Limitations
 
-1. Supports state properties in the form of  data classes, lists, maps and primitives. I had not written the code to parse normal classes and sealed classes assuming they will be harder to serialize into strings.
-   However I am planning to add timeouts for larger classes and return the best possible serialized versions.
+1. Tries to serialize field values using gson, if gson fails, tries it with Moshi. If both fail, returns the toString() value.
 2. Runs via adb port forwarding, I had planned to automate that process too using ddmlib but decided against it because a computer can have multiple adb devices connected and it would have been cumbersome observing the 
    device list and running port forwards based on the device id etc.
 

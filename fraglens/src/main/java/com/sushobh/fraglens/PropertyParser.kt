@@ -1,11 +1,13 @@
 package com.sushobh.fraglens
 
+import com.sushobh.fraglens.interceptors.FLCommonInterceptor
 import com.sushobh.fraglens.interceptors.FLDataclassInterceptor
 import com.sushobh.fraglens.interceptors.FLIterableInterceptor
 import com.sushobh.fraglens.interceptors.FLLiveDataInterceptor
 import com.sushobh.fraglens.interceptors.FLMapInterceptor
 import com.sushobh.fraglens.interceptors.FLPrimitveInterceptor
 import com.sushobh.fraglens.interceptors.FLStateFlowInterceptor
+import com.sushobh.fraglens.serializers.FLCommonSerializer
 import com.sushobh.fraglens.serializers.FLDataClassSerialzer
 import com.sushobh.fraglens.serializers.FLIterableSerializer
 import com.sushobh.fraglens.serializers.FLMapSerializer
@@ -18,7 +20,7 @@ internal class FLPropertyParserImpl : FLPropertyParser{
     private val flPrimitveSerialzer = FLPrimitveSerialzer()
     private val flDataClassSerialzer = FLDataClassSerialzer()
     private val flIterableSerializer = FLIterableSerializer()
-
+    private val flCommonSerializer = FLCommonSerializer()
     private val flFieldTypeChecker = FLFieldTypeChecker(flDataClassSerialzer,flPrimitveSerialzer,mapSerialzer,flIterableSerializer)
     private val primitiveInterceptor = FLPrimitveInterceptor(flPrimitveSerialzer)
     private val dataClassInterceptor = FLDataclassInterceptor(flDataClassSerialzer)
@@ -26,6 +28,7 @@ internal class FLPropertyParserImpl : FLPropertyParser{
     private val stateFlowInterceptor = FLStateFlowInterceptor(flFieldTypeChecker)
     private val iterableInterceptor = FLIterableInterceptor(flIterableSerializer)
     private val mapInterceptor = FLMapInterceptor(mapSerialzer)
+    private val flCommonInterceptor = FLCommonInterceptor(flCommonSerializer)
     private val interceptors = FragLens.propertyInterceptors.toMutableList()
 
     fun getDeclaredFieldsUpToLevel2(clazz: Class<*>): List<Field> {
@@ -77,7 +80,7 @@ internal class FLPropertyParserImpl : FLPropertyParser{
             FLFieldType.Map -> mapInterceptor.intercept(owner,field,fullFieldValue)
             FLFieldType.Primitive -> primitiveInterceptor.intercept(owner,field,fullFieldValue)
             FLFieldType.StateFlow -> stateFlowInterceptor.intercept(owner,field,fullFieldValue)
-            FLFieldType.Unknown ->  return null
+            FLFieldType.Unknown ->  flCommonInterceptor.intercept(owner,field,fullFieldValue)
         }
     }
 

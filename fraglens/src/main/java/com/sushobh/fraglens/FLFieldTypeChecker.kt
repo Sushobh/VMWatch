@@ -1,5 +1,6 @@
 package com.sushobh.fraglens
 
+import com.sushobh.fraglens.serializers.FLCommonSerializer
 import com.sushobh.fraglens.serializers.FLDataClassSerialzer
 import com.sushobh.fraglens.serializers.FLIterableSerializer
 import com.sushobh.fraglens.serializers.FLMapSerializer
@@ -10,8 +11,10 @@ import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.jvm.kotlinProperty
 
 class FLFieldTypeChecker(private val flDataClassSerialzer: FLDataClassSerialzer,
-                         private val flPrimitveSerialzer: FLPrimitveSerialzer, private val flMapSerializer: FLMapSerializer,
-                         val flIterableSerializer: FLIterableSerializer
+                         private val flPrimitveSerialzer: FLPrimitveSerialzer,
+                         private val flMapSerializer: FLMapSerializer,
+                         val flIterableSerializer: FLIterableSerializer,
+    private val flCommonSerializer: FLCommonSerializer
 ) {
 
     fun getSerializerForType(value: Any) : FLPropertySerialzer? {
@@ -20,7 +23,7 @@ class FLFieldTypeChecker(private val flDataClassSerialzer: FLDataClassSerialzer,
             FLFieldType.Iterable -> flIterableSerializer
             FLFieldType.Map -> flMapSerializer
             FLFieldType.Primitive -> flPrimitveSerialzer
-            else -> null
+            else -> flCommonSerializer
         }
     }
 
