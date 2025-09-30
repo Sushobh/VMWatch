@@ -58,6 +58,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("androidx.navigation:navigation-fragment:${nav_version}")
     implementation("androidx.navigation:navigation-ui:${nav_version}")
-    implementation("com.sushobh:fraglens:0.1.13")
-    //implementation(project(":fraglens"))
+    implementation(project(":fraglens"))
 }
