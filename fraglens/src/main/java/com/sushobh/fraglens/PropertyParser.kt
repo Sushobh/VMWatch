@@ -21,7 +21,7 @@ internal class FLPropertyParserImpl : FLPropertyParser{
     private val flDataClassSerialzer = FLDataClassSerialzer()
     private val flIterableSerializer = FLIterableSerializer()
     private val flCommonSerializer = FLCommonSerializer()
-    private val flFieldTypeChecker = FLFieldTypeChecker(flDataClassSerialzer,flPrimitveSerialzer,mapSerialzer,flIterableSerializer)
+    private val flFieldTypeChecker = FLFieldTypeChecker(flDataClassSerialzer,flPrimitveSerialzer,mapSerialzer,flIterableSerializer,flCommonSerializer)
     private val primitiveInterceptor = FLPrimitveInterceptor(flPrimitveSerialzer)
     private val dataClassInterceptor = FLDataclassInterceptor(flDataClassSerialzer)
     private val liveDataInterceptor = FLLiveDataInterceptor(flFieldTypeChecker)
