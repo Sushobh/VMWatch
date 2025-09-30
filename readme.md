@@ -18,7 +18,7 @@ First add this line in the app's gradle file
 
 ```java
    dependencies {
-		   implementation("com.sushobh:fraglens:0.1.13")
+		   implementation("com.sushobh:fraglens:0.1.14")
     }
 ```
 
