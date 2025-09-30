@@ -1,4 +1,4 @@
-name: Build VMWatch Desktop Distribution (macOS)
+name: Build VMWatch Desktop Distribution (windows)
 
 on:
   workflow_dispatch:   # run manually from Actions tab
