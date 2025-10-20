@@ -1,7 +1,7 @@
 # VMWatch (Experimental)
 
 Android library and desktop app to view viewmodel (associated with activities,fragment and navgraphs) properties as you are using the app. 
-Desktop app works only with Mac.
+
 
 ## Goal behind this project
 
@@ -22,9 +22,10 @@ First add this line in the app's gradle file
     }
 ```
 
-then download the mac desktop app (its a zip file with a dmg inside of it)
+then download the  desktop app (its a zip file with a dmg (mac) or msi installer (windows) inside of it)
 
-[Download Desktop app](https://github.com/Sushobh/VMWatch/actions/runs/17920949088/artifacts/4073912298)
+[Download the Mac Desktop app](https://github.com/Sushobh/VMWatch/actions/runs/18656737201/artifacts/4318569184)
+[Download the Windows Desktop app](https://github.com/Sushobh/VMWatch/actions/runs/18656734257/artifacts/4318740366)
 
 then run this adb command. To forward the mobile app server to the desktop.
 

@@ -37,5 +37,5 @@ jobs:
       - name: Upload Compose artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: VMWatchMacBuild
+          name: VMWatchWindowsBuild
           path: vmwatch_desktop/composeApp/build/compose/binaries/**
