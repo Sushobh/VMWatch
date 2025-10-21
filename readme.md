@@ -25,6 +25,7 @@ First add this line in the app's gradle file
 then download the  desktop app (its a zip file with a dmg (mac) or msi installer (windows) inside of it)
 
 [Download the Mac Desktop app](https://github.com/Sushobh/VMWatch/actions/runs/18656737201/artifacts/4318569184)
+
 [Download the Windows Desktop app](https://github.com/Sushobh/VMWatch/actions/runs/18657476109/artifacts/4318874875)
 
 then run this adb command. To forward the mobile app server to the desktop.
