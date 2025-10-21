@@ -39,6 +39,8 @@ class TestViewModel : BaseViewModel() {
     ) : Animal(age)
 
 
+    class Car(val name : String,val speed : String)
+
 
     val hobbiesOfCat : List<Hobby> =
         arrayListOf(Hobby("Meowing"),Hobby("Running"))
@@ -66,6 +68,7 @@ class TestViewModel : BaseViewModel() {
         "North America" to listOf("Bison", "Bald Eagle", "Grizzly Bear"),
         "South America" to listOf("Jaguar", "Sloth", "Anaconda")
     )
+    private val car = Car("Ferrari","300km/h")
 
 
     val personObj = Person(
