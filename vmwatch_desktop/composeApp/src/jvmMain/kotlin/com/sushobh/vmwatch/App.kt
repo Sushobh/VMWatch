@@ -22,13 +22,9 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App() {
     val configApi = remember { ConfigApi() }
-    val vmListViewModel = remember { VmListViewModel() }
     val themeViewModel = remember { ThemeViewModel() }
     val vmWatchStateApi = remember { VMWatchStateApiImpl() }
     val pollingViewModel = remember { PollingViewModel(configApi, vmWatchStateApi) }
-
-    val viewModels by vmListViewModel.viewModels.collectAsState()
-    val selectedViewModel by vmListViewModel.selectedViewModel.collectAsState()
 
     val availableThemes by themeViewModel.themes.collectAsState()
     val currentTheme by themeViewModel.currentTheme.collectAsState()
@@ -51,17 +47,6 @@ fun App() {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-//                ViewModelList(
-//                    viewModels = viewModels,
-//                    selectedViewModel = selectedViewModel,
-//                    onViewModelSelected = { vmName -> vmListViewModel.onViewModelSelected(vmName) }
-//                )
-//
-//                VerticalDivider()
-//
-//                ViewModelDetails(viewModel = pollingViewModel,
-//                    modifier = Modifier.weight(3f)
-//                )
                 FLPollingDetailsView(pollingViewModel)
             }
         }

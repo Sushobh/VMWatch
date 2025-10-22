@@ -19,40 +19,10 @@ data class FLProperty(
     }
 }
 
-@Serializable
-data class FLPropertyOwner(
-    val name: String,
-    val type: String,
-    val properties: List<FLProperty>
-) {
-    override fun toString(): String {
-        return "PropertyOwner(name='$name', type='$type', properties=$properties)"
-    }
-}
 
 @Serializable
 data class FLSerializeFieldResponse(val isSuccess: Boolean = false, val value: FLProperty? = null)
 
-data class FLReflectionProperty(private val field: Field, private val owner: Any)
-
-
-interface FLPropertyParser {
-    fun parseProperties(owner: Any): FLPropertyOwner
-    fun refresh(propertyOwner: FLPropertyOwner): FLPropertyOwner
-}
-
-interface FLPropertyStore {
-    val propertyOwners: MutableMap<String, FLPropertyOwner>
-}
-
-interface FLPropertyParserInterceptor {
-    fun intercept(owner: Any, field: Field): FLProperty?
-}
-
-interface FragLensApi {
-    val viewModelIdFlow: StateFlow<List<FLViewModelId>>
-    fun parseProperties(flViewModelId: FLViewModelId): FLPropertyOwner?
-}
 
 @Serializable
 data class FLViewModelId(
