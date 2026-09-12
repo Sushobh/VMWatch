@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.sushobh.vmwatch.VMWatchApps
 import com.sushobh.vmwatch.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -17,7 +18,10 @@ fun AppBar(
     appName: String,
     availableThemes: List<AppTheme>,
     selectedTheme: AppTheme,
-    onThemeSelected: (AppTheme) -> Unit
+    onThemeSelected: (AppTheme) -> Unit,
+    availableApps: List<VMWatchApps>,
+    selectedApp: VMWatchApps,
+    onAppSelected: (VMWatchApps) -> Unit
 ) {
     TopAppBar(
         title = { Text(appName, style = MaterialTheme.typography.titleLarge) },
@@ -27,8 +31,9 @@ fun AppBar(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.padding(end = 16.dp)
             ) {
-                ThemeSelector(availableThemes, selectedTheme, onThemeSelected)
+                //ThemeSelector(availableThemes, selectedTheme, onThemeSelected)
                 //DeviceSelector(devices, selectedDevice, onDeviceSelected)
+                AppSelector(availableApps,selectedApp,onAppSelected)
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -37,6 +42,56 @@ fun AppBar(
         )
     )
 }
+
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun AppSelector(
+    availableApps: List<VMWatchApps>,
+    selectedApp: VMWatchApps,
+    onAppSelected: (VMWatchApps) -> Unit
+) {
+    var dropDownExpanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = dropDownExpanded,
+        onExpandedChange = { dropDownExpanded = !dropDownExpanded }
+    ) {
+        TextField(
+            value = selectedApp.displayName,
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropDownExpanded) },
+            modifier = Modifier.menuAnchor(),
+            colors = androidx.compose.material3.TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent,
+                focusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        )
+
+        ExposedDropdownMenu(
+            expanded = dropDownExpanded,
+            onDismissRequest = { dropDownExpanded = false }
+        ) {
+            availableApps.forEach { theme ->
+                DropdownMenuItem(
+                    text = { Text(theme.displayName) },
+                    onClick = {
+                        onAppSelected(theme)
+                        dropDownExpanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)

@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.sushobh.fraglens"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -58,6 +58,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("androidx.navigation:navigation-fragment:${nav_version}")
     implementation("androidx.navigation:navigation-ui:${nav_version}")
-    //implementation(project(":fraglens"))
-    implementation("com.sushobh:fraglens:0.1.14")
+    implementation(project(":fraglens"))
+    //implementation("com.sushobh:fraglens:0.1.14")
 }

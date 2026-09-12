@@ -10,6 +10,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.sushobh.vmwatch.actcycle.ActCycleViewModel
+import com.sushobh.vmwatch.actcycle.ActCycleViewer
 import com.sushobh.vmwatch.config.ConfigApi
 import com.sushobh.vmwatch.ui.AppBar
 import com.sushobh.vmwatch.ui.VMWatchStateApiImpl
@@ -25,9 +27,13 @@ fun App() {
     val themeViewModel = remember { ThemeViewModel() }
     val vmWatchStateApi = remember { VMWatchStateApiImpl() }
     val pollingViewModel = remember { PollingViewModel(configApi, vmWatchStateApi) }
+    val actCycleViewModel = remember { ActCycleViewModel(configApi) }
 
     val availableThemes by themeViewModel.themes.collectAsState()
     val currentTheme by themeViewModel.currentTheme.collectAsState()
+
+    val currentSelectedApp by themeViewModel.currentSelectedApp.collectAsState()
+    val availableApps by themeViewModel.apps.collectAsState()
 
     MaterialTheme(
         colorScheme = currentTheme.colorScheme
@@ -38,7 +44,12 @@ fun App() {
                     appName = configApi.getAppName(),
                     availableThemes = availableThemes,
                     selectedTheme = currentTheme,
-                    onThemeSelected = { theme -> themeViewModel.onThemeSelected(theme) }
+                    onThemeSelected = { theme -> themeViewModel.onThemeSelected(theme) },
+                    availableApps = availableApps,
+                    onAppSelected = {
+                        themeViewModel.onAppSelected(it)
+                    },
+                    selectedApp = currentSelectedApp
                 )
             }
         ) { paddingValues ->
@@ -47,7 +58,14 @@ fun App() {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                FLPollingDetailsView(pollingViewModel)
+                when(currentSelectedApp){
+                    VMWatchApps.AppActCycle -> {
+                        ActCycleViewer(actCycleViewModel)
+                    }
+                    VMWatchApps.AppViewModelCheck -> {
+                        FLPollingDetailsView(pollingViewModel)
+                    }
+                }
             }
         }
     }

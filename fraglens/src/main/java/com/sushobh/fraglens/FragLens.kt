@@ -64,6 +64,7 @@ object FragLens : FragLensApi {
         this.propertyParser = FLPropertyParserImpl()
         application.registerActivityLifecycleCallbacks(activityLifecycleCallback)
         startApiServer(application)
+        FLNActEventStore.start()
     }
 
     fun stop(){
@@ -208,6 +209,22 @@ object FragLens : FragLensApi {
                     }
                     FLLogger.log("getdetailsfromprop took ${time} millis")
                     return resp
+                }
+
+            }).
+            addRequestHandler(object : GetRequestHandler<Any>() {
+
+                override fun onGetRequest(uri: String): Any {
+                    val (resp,time) = measureTimedValue {
+                        FLNActEventStore.getActState
+                    }
+
+                    FLLogger.log("getactstate took ${time} millis")
+                    return resp
+                }
+
+                override fun getMethodName(): String {
+                    return "getactstate"
                 }
 
             }).startWebApp(false).build()

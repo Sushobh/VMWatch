@@ -2,11 +2,12 @@ package com.sushobh.fraglens
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.sushobh.fraglens.main.R
 
 
-class MainActivity : FragmentActivity() {
+class MainActivity : AppCompatActivity() {
 
     val vm : TestViewModel by viewModels()
 

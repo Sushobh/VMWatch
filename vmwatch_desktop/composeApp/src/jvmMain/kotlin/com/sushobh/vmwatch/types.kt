@@ -1,8 +1,6 @@
 package com.sushobh.vmwatch
 
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
-import java.lang.reflect.Field
 
 @Serializable
 data class FLProperty(
@@ -55,4 +53,18 @@ sealed class FLCListViewItem(open val code: String) {
     data class FLCListViewModel(val viewModelId: FLViewModelId, override val code: String) : FLCListViewItem(code)
     data class FLCListViewModelOwner(val isSelected: Boolean = false, val name: String, override val code: String) :
         FLCListViewItem(code)
+}
+
+
+@kotlinx.serialization.Serializable
+data class ActLifecycleEvents(
+    val onStarted: List<String> = emptyList(),
+    val onResumed: List<String> = emptyList(),
+    val onStopped: List<String> = emptyList(),
+    val onPaused: List<String> = emptyList()
+)
+
+sealed class VMWatchApps(val displayName : String) {
+    data object AppActCycle: VMWatchApps("LifeCycleViewer")
+    data object AppViewModelCheck : VMWatchApps("ViewModelCheck")
 }
