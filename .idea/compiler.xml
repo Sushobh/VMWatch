@@ -3,6 +3,9 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="21">
       <module name="Demo.app.fraglens" target="17" />
+      <module name="VMwatch.methodtimer" target="11" />
+      <module name="VMwatch.methodtimer.main" target="11" />
+      <module name="VMwatch.methodtimer.test" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

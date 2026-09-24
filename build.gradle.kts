@@ -5,4 +5,6 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.android.library) apply false
     id("com.vanniktech.maven.publish") version "0.32.0" apply false
+    alias(libs.plugins.jetbrains.kotlin.jvm) apply false
+    id("com.sushobh.method-timer-plugin")
 }

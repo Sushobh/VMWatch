@@ -1,5 +1,4 @@
 pluginManagement {
-    includeBuild("./methodtimer")
     repositories {
         google {
             content {
@@ -20,6 +19,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "VMwatch"
-include(":app")
-include(":fraglens")
+rootProject.name = "MethodTimer"
