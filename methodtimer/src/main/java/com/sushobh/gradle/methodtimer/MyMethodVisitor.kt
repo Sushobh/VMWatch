@@ -21,6 +21,7 @@ class MyMethodVisitor(
         superName: String?,
         interfaces: Array<out String>?
     ) {
+
         className = name.replace('/', '.')
         classAccess = access
 
@@ -41,6 +42,8 @@ class MyMethodVisitor(
         signature: String?,
         exceptions: Array<out String>?
     ): MethodVisitor {
+        //println("Checking123 for ${signature}/${className} and ${name} and ${descriptor}")
+        //val methodToIgnore = signature?.contains("MethodTimerKt", ignoreCase = true) ?: false
         val nextMethodVisitor = super.visitMethod(
             access,
             name,

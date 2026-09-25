@@ -14,7 +14,7 @@ open class BaseViewModel : ViewModel() {
     )
     private val stateFlow0 = MutableStateFlow(false)
     private val liveData0 = MutableLiveData(false)
-    private var someText0 = "Hello, World!"
+    private var someText0 = "Hello, World!!"
     private val soomBool0 = false
     private val sumInt0 = 412
 }

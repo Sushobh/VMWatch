@@ -12,6 +12,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.ranrings.libs.androidapptorest.AndroidRestServer
 import com.ranrings.libs.androidapptorest.Base.GetRequestHandler
 import com.ranrings.libs.androidapptorest.Base.PostRequestHandler
+import com.sushobh.fraglens.methodtimer.MethodTimer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.time.measureTimedValue
@@ -227,7 +228,72 @@ object FragLens : FragLensApi {
                     return "getactstate"
                 }
 
-            }).startWebApp(false).build()
+            }).
+            addRequestHandler(object : GetRequestHandler<Any>() {
+
+                override fun onGetRequest(uri: String): Any {
+                    val (resp,time) = measureTimedValue {
+                        MethodTimer.top100Slowest.getInformation()
+                    }
+
+                    FLLogger.log("${getMethodName()} took ${time} millis")
+                    return resp
+                }
+
+                override fun getMethodName(): String {
+                    return "mtSlow"
+                }
+
+            }).
+            addRequestHandler(object : GetRequestHandler<Any>() {
+
+                override fun onGetRequest(uri: String): Any {
+                    val (resp,time) = measureTimedValue {
+                        MethodTimer.top100MostFrequent.getInformation()
+                    }
+
+                    FLLogger.log("${getMethodName()} took ${time} millis")
+                    return resp
+                }
+
+                override fun getMethodName(): String {
+                    return "mtFreq"
+                }
+
+            }).
+            addRequestHandler(object : GetRequestHandler<Any>() {
+
+                override fun onGetRequest(uri: String): Any {
+                    val (resp,time) = measureTimedValue {
+                        MethodTimer.totalTime.getInformation()
+                    }
+
+                    FLLogger.log("${getMethodName()} took ${time} millis")
+                    return resp
+                }
+
+                override fun getMethodName(): String {
+                    return "mtTotalTime"
+                }
+
+            }).
+            addRequestHandler(object : GetRequestHandler<Any>() {
+
+                override fun onGetRequest(uri: String): Any {
+                    val (resp,time) = measureTimedValue {
+                       MethodTimer.liveEvents.getInformation()
+                    }
+
+                    FLLogger.log("${getMethodName()} took ${time} millis")
+                    return resp
+                }
+
+                override fun getMethodName(): String {
+                    return "mtLiveEvents"
+                }
+
+            }).
+            startWebApp(false).build()
         server?.start()
     }
 

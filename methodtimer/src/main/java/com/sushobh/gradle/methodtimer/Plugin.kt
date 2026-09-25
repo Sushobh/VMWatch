@@ -10,7 +10,9 @@ import org.gradle.api.Project
 class MethodTimerPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         project.subprojects {
-
+            if (path == ":fraglens") {
+                return@subprojects
+            }
             plugins.withId("com.android.application") {
                 setupTransformer()
             }

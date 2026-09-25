@@ -42,13 +42,13 @@ internal class MethodTimerAdviceAdapter(
 
     override fun onMethodExit(opcode: Int) {
         /*
-         * Generates:
-         *
-         * long durationNanos = System.nanoTime() - startTime;
-         */
+      * Generates:
+      *
+      * long durationNanos = System.nanoTime() - startTime;
+      */
 
         invokeStatic(
-             SYSTEM_TYPE,
+            SYSTEM_TYPE,
             NANO_TIME_METHOD
         )
 
@@ -65,28 +65,13 @@ internal class MethodTimerAdviceAdapter(
         /*
          * Generates:
          *
-         * Log.d(
-         *     "SushobhMethodTimer",
-         *     "com.example.MyClass.methodName -> 2.45 ms"
-         * );
+         * onMethodEnded(
+         *     "com.example.MyClass.methodName",
+         *     durationNanos / 1_000_000.0
+         * )
          */
 
-        push( LOG_TAG)
-
-        newInstance(STRING_BUILDER_TYPE)
-        dup()
-
-        invokeConstructor(
-            STRING_BUILDER_TYPE,
-             STRING_BUILDER_CONSTRUCTOR
-        )
-
-        push( "$className.$targetMethodName -> ")
-
-        invokeVirtual(
-            STRING_BUILDER_TYPE,
-            APPEND_STRING_METHOD
-        )
+        push("$className.$targetMethodName")
 
         loadLocal(durationLocalIndex, Type.LONG_TYPE)
 
@@ -95,88 +80,42 @@ internal class MethodTimerAdviceAdapter(
             Type.DOUBLE_TYPE
         )
 
-        push( NANOSECONDS_PER_MILLISECOND)
+        push(NANOSECONDS_PER_MILLISECOND)
 
         math(
             DIV,
             Type.DOUBLE_TYPE
         )
 
-        invokeVirtual(
-            STRING_BUILDER_TYPE,
-            APPEND_DOUBLE_METHOD
-        )
-
-        push(" ms")
-
-        invokeVirtual(
-             STRING_BUILDER_TYPE,
-            APPEND_STRING_METHOD
-        )
-
-        invokeVirtual(
-            STRING_BUILDER_TYPE,
-            TO_STRING_METHOD
-        )
-
         invokeStatic(
-            ANDROID_LOG_TYPE,
-            LOG_DEBUG_METHOD
+            METHOD_TIMER_TYPE,
+            ON_METHOD_ENDED_METHOD
         )
-
-        // Log.d() returns an Int, which must be removed from the stack.
-        pop()
     }
 
     private companion object {
 
-        private const val LOG_TAG = "SushobhMethodTimer"
 
         private const val NANOSECONDS_PER_MILLISECOND = 1_000_000.0
 
-        private val SYSTEM_TYPE: Type =
-            Type.getObjectType( "java/lang/System")
+        private val SYSTEM_TYPE =
+            Type.getObjectType("java/lang/System")
 
-        private val STRING_BUILDER_TYPE: Type =
-            Type.getObjectType("java/lang/StringBuilder")
-
-        private val ANDROID_LOG_TYPE: Type =
-            Type.getObjectType( "android/util/Log")
+        private val METHOD_TIMER_TYPE =
+            Type.getObjectType(
+                "com/sushobh/fraglens/methodtimer/MethodTimerKt"
+            )
 
         private val NANO_TIME_METHOD =
             Method(
-                 "nanoTime",
-                 "()J"
+                "nanoTime",
+                "()J"
             )
 
-        private val STRING_BUILDER_CONSTRUCTOR =
+        private val ON_METHOD_ENDED_METHOD =
             Method(
-                 "<init>",
-                "()V"
-            )
-
-        private val APPEND_STRING_METHOD =
-            Method(
-                 "append",
-                 "(Ljava/lang/String;)Ljava/lang/StringBuilder;"
-            )
-
-        private val APPEND_DOUBLE_METHOD =
-            Method(
-                 "append",
-                "(D)Ljava/lang/StringBuilder;"
-            )
-
-        private val TO_STRING_METHOD =
-            Method(
-                 "toString",
-                 "()Ljava/lang/String;"
-            )
-
-        private val LOG_DEBUG_METHOD =
-            Method(
-                 "d",
-                 "(Ljava/lang/String;Ljava/lang/String;)I"
+                "onMethodEnded9898",
+                "(Ljava/lang/String;D)V"
             )
     }
 }
