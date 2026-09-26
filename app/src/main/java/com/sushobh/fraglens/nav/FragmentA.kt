@@ -44,9 +44,6 @@ class FragmentA : Fragment() {
             findNavController().navigate(R.id.action_fragmentA_to_fragmentB)
         }
 
-        for(i in 0..Math.pow(10.0,3.0).toInt()){
-            print("Hello")
-        }
 
         return view
     }
