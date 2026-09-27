@@ -68,4 +68,9 @@ internal class Top100Slowest : MethodTimerInsight<List<MethodEvent>> {
         return top100SlowestMethods
             .sortedByDescending { it.timeTaken }
     }
+
+    override fun resetData() {
+        eventsByMethod.clear()
+        top100SlowestMethods.clear()
+    }
 }

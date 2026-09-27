@@ -8,11 +8,11 @@ class ThemeViewModel {
     private val _themes = MutableStateFlow(AppTheme.values().toList())
     val themes: StateFlow<List<AppTheme>> = _themes
 
-    private val _apps = MutableStateFlow(listOf(VMWatchApps.AppActCycle, VMWatchApps.AppViewModelCheck))
+    private val _apps = MutableStateFlow(listOf(VMWatchApps.AppActCycle, VMWatchApps.AppViewModelCheck, VMWatchApps.MethodTimer))
     val apps : StateFlow<List<VMWatchApps>> = _apps
 
 
-    private val _currentSelectedApp : MutableStateFlow<VMWatchApps> = MutableStateFlow(VMWatchApps.AppActCycle)
+    private val _currentSelectedApp : MutableStateFlow<VMWatchApps> = MutableStateFlow(VMWatchApps.MethodTimer)
     val currentSelectedApp : StateFlow<VMWatchApps> = _currentSelectedApp
 
     private val _currentTheme = MutableStateFlow(AppTheme.MINT)

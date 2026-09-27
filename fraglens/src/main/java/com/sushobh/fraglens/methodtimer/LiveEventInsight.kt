@@ -1,82 +1,67 @@
 package com.sushobh.fraglens.methodtimer
 
-import java.util.PriorityQueue
+import java.math.BigInteger
 
-internal data class LiveMethodCallCount(
-    val methodName: String,
-    val callCount: Long
-)
 
-internal class LiveEventCalledInsight :
-    MethodTimerInsight<List<LiveMethodCallCount>> {
 
-    companion object {
-        private const val MAX_METHODS = 100
-    }
 
-    // Complete count for each method.
-    private val callCounts = HashMap<String, Long>()
+internal class LiveEventsInsight(
+    private val maxEvents: Int = 2_000
+) : MethodTimerInsight<List<MethodEventGroup>> {
+    private var id : BigInteger = BigInteger("0")
+    private val groups = ArrayDeque<MethodEventGroup>()
 
-    // Only the current top 100 methods.
-    // The least-called method is at the head.
-    private val topMethods =
-        PriorityQueue<LiveMethodCallCount> { a, b ->
-            a.callCount.compareTo(b.callCount)
-        }
+    private var eventCount = 0
 
     override fun addItem(methodEvent: MethodEvent) {
+        val lastGroup = groups.lastOrNull()
 
-        val methodName = methodEvent.methodName
-
-        val newCount =
-            (callCounts[methodName] ?: 0L) + 1
-
-        callCounts[methodName] = newCount
-
-        // Method is already in the top 100.
-        val existing = topMethods
-            .firstOrNull { it.methodName == methodName }
-
-        if (existing != null) {
-            topMethods.remove(existing)
-
-            topMethods.add(
-                LiveMethodCallCount(
-                    methodName = methodName,
-                    callCount = newCount
+        if (lastGroup != null &&
+            lastGroup.methodName == methodEvent.methodName
+        ) {
+            lastGroup.events.add(methodEvent)
+        } else {
+            id = id.plus(BigInteger("1"))
+            groups.addLast(
+                MethodEventGroup(
+                    methodName = methodEvent.methodName,
+                    events = mutableListOf(methodEvent),
+                    id
                 )
             )
-
-            return
         }
 
-        // We still have room.
-        if (topMethods.size < MAX_METHODS) {
+        eventCount++
+        trimToMaxEvents()
+    }
 
-            topMethods.add(
-                LiveMethodCallCount(
-                    methodName = methodName,
-                    callCount = newCount
-                )
-            )
+    private fun trimToMaxEvents() {
+        while (eventCount > maxEvents) {
+            val firstGroup = groups.first()
 
-        } else if (newCount > topMethods.peek().callCount) {
+            if (firstGroup.events.size == 1) {
+                groups.removeFirst()
+            } else {
+                firstGroup.events.removeAt(0)
+            }
 
-            // Remove the least-called method.
-            topMethods.poll()
-
-            topMethods.add(
-                LiveMethodCallCount(
-                    methodName = methodName,
-                    callCount = newCount
-                )
-            )
+            eventCount--
         }
     }
 
     override fun getDescription(): String =
-        "Top 100 most called methods"
+        "Live method events"
 
-    override fun getInformation(): List<LiveMethodCallCount> =
-        topMethods.sortedByDescending { it.callCount }
+    override fun getInformation(): List<MethodEventGroup> =
+        groups.map { group ->
+            group.copy(
+                events = group.events.toMutableList()
+            )
+        }.sortedBy { it.events.map { it.id.multiply(BigInteger("-1")) }.min() }
+
+    override fun resetData() {
+        groups.clear()
+        eventCount = 0
+    }
 }
+

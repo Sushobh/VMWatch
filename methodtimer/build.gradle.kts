@@ -46,7 +46,7 @@ mavenPublishing {
 }
 
 mavenPublishing {
-    coordinates("com.sushobh", "method-timer-plugin", "1.0.7")
+    coordinates("com.sushobh", "method-timer-plugin", "1.0.8")
 
     pom {
         name.set("Method Timer")

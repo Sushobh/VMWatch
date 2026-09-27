@@ -18,7 +18,7 @@ interface Store<State, Event> {
 }
 
 // Generic implementation
-class StateStore<State, Event>(
+open class StateStore<State, Event>(
     initialState: State,
     private val reducerFn: Reducer<State, Event>,
     private val middlewares: List<Middleware<State, Event>> = emptyList(),

@@ -2,10 +2,6 @@ package com.sushobh.fraglens.methodtimer
 
 import java.util.PriorityQueue
 
-internal data class MethodCallCount(
-    val methodName: String,
-    val callCount: Long
-)
 
 internal class MostCalledInsight :
     MethodTimerInsight<List<MethodCallCount>> {
@@ -79,4 +75,9 @@ internal class MostCalledInsight :
 
     override fun getInformation(): List<MethodCallCount> =
         topMethods.sortedByDescending { it.callCount }
+
+    override fun resetData() {
+        topMethods.clear()
+        callCounts.clear()
+    }
 }

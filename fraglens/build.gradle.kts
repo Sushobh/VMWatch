@@ -59,7 +59,7 @@ mavenPublishing {
 }
 
 mavenPublishing {
-    coordinates("com.sushobh", "fraglens", "0.1.16")
+    coordinates("com.sushobh", "fraglens", "0.1.17")
 
     pom {
         name.set("Frag Lens")

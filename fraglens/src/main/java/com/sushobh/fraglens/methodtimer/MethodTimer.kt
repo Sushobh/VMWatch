@@ -5,25 +5,25 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.math.BigInteger
 
 fun onMethodEnded9898(methodName : String, timeTaken : Double) {
-    Log.i("MethodTimer","Received ${methodName.toString()}")
-    MethodTimer.methodCalled(MethodEvent(methodName,timeTaken))
+    MethodTimer.methodCalled(methodName,timeTaken)
 }
 
 
-internal class MethodEvent(val methodName : String,val timeTaken: Double)
+
 
 internal object MethodTimer {
-
+    private var count = BigInteger("0")
     private val queue : ArrayDeque<MethodEvent> = ArrayDeque()
     val top100Slowest = Top100Slowest()
     val top100MostFrequent = MostCalledInsight()
     val totalTime = TotalTimeInsight()
-    val liveEvents = LiveEventCalledInsight()
+    val liveEvents = LiveEventsInsight()
     private val scope = CoroutineScope(Dispatchers.Default)
     private var taskStarted = false
-
+    private val allInsights = listOf(top100Slowest,top100MostFrequent,totalTime,liveEvents)
     fun startProcessing(){
         taskStarted = true
         try {
@@ -31,7 +31,7 @@ internal object MethodTimer {
                 while(true){
                     val item = queue.removeFirstOrNull()
                     if(item != null){
-                        listOf(top100Slowest,top100MostFrequent,totalTime,liveEvents).forEach {
+                        allInsights.forEach {
                             it.addItem(item)
                         }
                     }
@@ -42,17 +42,28 @@ internal object MethodTimer {
             }
         }
         catch (e : Exception){
-            e.printStackTrace()
+
         }
     }
 
-    fun methodCalled(methodEvent: MethodEvent){
+    fun methodCalled(methodName : String,time : Double){
         if(!taskStarted){
             startProcessing()
         }
-        queue.addLast(methodEvent)
+        count = count.plus(BigInteger("1"))
+        queue.addLast(MethodEvent(methodName,time,count))
     }
 
+    fun clearData() {
+        try {
+            scope.launch {
+               allInsights.forEach { it.resetData() }
+            }
+        }
+        catch (e : Exception){
+
+        }
+    }
 
 
 }

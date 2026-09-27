@@ -1,19 +1,20 @@
-package com.sushobh.fraglens.methodtimer
+package com.sushobh.vmwatch.common
 
+import kotlinx.serialization.Serializable
 import java.math.BigInteger
 
-internal interface MethodTimerInsight<X> {
+
+interface MethodTimerInsight<X> {
     fun addItem(methodEvent: MethodEvent)
     fun getDescription() : String
     fun getInformation() : X
-    fun resetData()
 }
 
-
-internal data class MethodEventGroup(
+@Serializable
+data class MethodEventGroup(
     val methodName: String,
     val events: MutableList<MethodEvent> = mutableListOf(),
-    val id : BigInteger
+    val id : Long
 ) {
     val count: Int
         get() = events.size
@@ -22,14 +23,17 @@ internal data class MethodEventGroup(
         get() = events.sumOf { it.timeTaken }
 }
 
-internal class MethodEvent(val methodName : String,val timeTaken: Double,val id : BigInteger)
+@Serializable
+class MethodEvent(val methodName : String,val timeTaken: Double,val id : Long)
 
-internal data class MethodCallCount(
+@Serializable
+data class MethodCallCount(
     val methodName: String,
     val callCount: Long
 )
 
-internal data class MethodTotalTime(
+@Serializable
+data class MethodTotalTime(
     val methodName: String,
     val totalTime: Double
 )

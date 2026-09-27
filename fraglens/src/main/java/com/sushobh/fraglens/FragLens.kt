@@ -293,6 +293,23 @@ object FragLens : FragLensApi {
                 }
 
             }).
+
+            addRequestHandler(object : GetRequestHandler<Any>() {
+
+                override fun onGetRequest(uri: String): Any {
+                    val (resp,time) = measureTimedValue {
+                        MethodTimer.clearData()
+                    }
+
+                    FLLogger.log("${getMethodName()} took ${time} millis")
+                    return resp
+                }
+
+                override fun getMethodName(): String {
+                    return "mtClear"
+                }
+
+            }).
             startWebApp(false).build()
         server?.start()
     }

@@ -67,4 +67,5 @@ data class ActLifecycleEvents(
 sealed class VMWatchApps(val displayName : String) {
     data object AppActCycle: VMWatchApps("LifeCycleViewer")
     data object AppViewModelCheck : VMWatchApps("ViewModelCheck")
+    data object MethodTimer : VMWatchApps("Method Timer")
 }

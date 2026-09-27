@@ -2,10 +2,6 @@ package com.sushobh.fraglens.methodtimer
 
 import java.util.PriorityQueue
 
-internal data class MethodTotalTime(
-    val methodName: String,
-    val totalTime: Double
-)
 
 internal class TotalTimeInsight :
     MethodTimerInsight<List<MethodTotalTime>> {
@@ -75,4 +71,9 @@ internal class TotalTimeInsight :
     override fun getInformation(): List<MethodTotalTime> =
         topMethods
             .sortedByDescending { it.totalTime }
+
+    override fun resetData() {
+        totals.clear()
+        topMethods.clear()
+    }
 }

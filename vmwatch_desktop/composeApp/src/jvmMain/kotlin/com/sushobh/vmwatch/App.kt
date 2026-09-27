@@ -1,5 +1,6 @@
 package com.sushobh.vmwatch
 
+import MethodTimerView
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import com.sushobh.vmwatch.actcycle.ActCycleViewModel
 import com.sushobh.vmwatch.actcycle.ActCycleViewer
 import com.sushobh.vmwatch.config.ConfigApi
+import com.sushobh.vmwatch.methodtimer.MethodTimerViewModel
 import com.sushobh.vmwatch.ui.AppBar
 import com.sushobh.vmwatch.ui.VMWatchStateApiImpl
 import com.sushobh.vmwatch.ui.polling.FLPollingDetailsView
@@ -28,6 +30,7 @@ fun App() {
     val vmWatchStateApi = remember { VMWatchStateApiImpl() }
     val pollingViewModel = remember { PollingViewModel(configApi, vmWatchStateApi) }
     val actCycleViewModel = remember { ActCycleViewModel(configApi) }
+    val methodTimerViewModel = remember { MethodTimerViewModel(configApi) }
 
     val availableThemes by themeViewModel.themes.collectAsState()
     val currentTheme by themeViewModel.currentTheme.collectAsState()
@@ -64,6 +67,10 @@ fun App() {
                     }
                     VMWatchApps.AppViewModelCheck -> {
                         FLPollingDetailsView(pollingViewModel)
+                    }
+
+                    VMWatchApps.MethodTimer -> {
+                        MethodTimerView(methodTimerViewModel)
                     }
                 }
             }
